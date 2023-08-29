@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "the-rubber-duck-debuggers"
+name = "project"
 version = "0.1.0"
 description = ""
 authors = ["the-rubber-duck-debuggers"] # TODO: fill in team member names?
