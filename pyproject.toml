@@ -2,13 +2,19 @@
 name = "project"
 version = "0.1.0"
 description = ""
-authors = ["nozwock", "realstealthninja", "SimonMeersschaut", "Sapient44", "Nhsdkk"]
+authors = [
+    "nozwock",
+    "realstealthninja",
+    "SimonMeersschaut",
+    "Sapient44",
+    "Nhsdkk",
+]
 license = "MIT"
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.12"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 # Base tools
 flake8 = "~4.0.1"
 isort = "~5.12.0"
