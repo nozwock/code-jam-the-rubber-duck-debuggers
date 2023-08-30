@@ -2,7 +2,7 @@
 name = "project"
 version = "0.1.0"
 description = ""
-authors = ["nozwock", "realstealthninja"]
+authors = ["nozwock", "realstealthninja", "SimonMeersschaut"]
 license = "MIT"
 
 [tool.poetry.dependencies]
