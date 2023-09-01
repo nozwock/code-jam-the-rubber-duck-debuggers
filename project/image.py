@@ -12,7 +12,7 @@ from pathlib import Path
 class EncoderInterface(typing.Protocol):
     def encode(self) -> Image: ...
 
-    def decode(self) -> None: ...
+    def decode(self, img: numpy.ndarray) -> str: ...
 
 
 class Image:
@@ -27,13 +27,12 @@ class Image:
         self.data = data
         self.height = self.data.shape[0]
         self.width = self.data.shape[1]
-        print("Created Instance")
 
     @staticmethod
     def encode(self, encoder: EncoderInterface) -> Image:
         pass
 
-    def decode(self, encoder: EncoderInterface, data: numpy.ndarray) -> None:
+    def decode(self, encoder: EncoderInterface, data: numpy.ndarray) -> str:
         pass
 
 
