@@ -1,6 +1,7 @@
 import typing
 
 import numpy
+import cv2
 
 from project.image.encoders.iface import EncoderInterface
 from pathlib import Path
@@ -32,10 +33,9 @@ def read_image(filepath: str) -> Image:
     if not(pathlib_path.exists()) or not(pathlib_path.is_file()):
         raise Exception(f"Invalid filepath provided: {filepath}")
 
-    shape = (1, 1, 1)
-    pixel_array = numpy.zeros(shape)
+    data = cv2.imread(str(pathlib_path))
 
-    return Image(pixel_array)
+    return Image(data)
 
 
 if __name__ == "__main__":
