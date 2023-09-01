@@ -1,10 +1,18 @@
+from __future__ import annotations
+
 import typing
 
 import numpy
 import cv2
 
-from project.image.encoders.iface import EncoderInterface
+# from project.image.encoders.iface import EncoderInterface
 from pathlib import Path
+
+
+class EncoderInterface(typing.Protocol):
+    def encode(self) -> Image: ...
+
+    def decode(self) -> None: ...
 
 
 class Image:
@@ -21,7 +29,8 @@ class Image:
         self.width = self.data.shape[1]
         print("Created Instance")
 
-    def encode(self, encoder: EncoderInterface) -> typing.Self:
+    @staticmethod
+    def encode(self, encoder: EncoderInterface) -> Image:
         pass
 
     def decode(self, encoder: EncoderInterface, data: numpy.ndarray) -> None:
@@ -39,4 +48,4 @@ def read_image(filepath: str) -> Image:
 
 
 if __name__ == "__main__":
-    image = read_image("./")
+    image = read_image("image/")
