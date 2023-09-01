@@ -17,6 +17,8 @@ project = 'project.cli:app'
 [tool.poetry.dependencies]
 python = ">=3.11,<3.12"
 typer = "^0.9.0"
+opencv-python = "^4.8.0.76"
+numpy = "^1.25.2"
 
 [tool.poetry.group.dev.dependencies]
 # Base tools
@@ -28,6 +30,7 @@ mypy = "^1.5.1"
 
 # Flake8 plugins, see https://github.com/python-discord/code-jam-template/tree/main#plugin-list
 flake8-docstrings = "~1.7.0"
+ipykernel = "^6.25.1"
 
 [build-system]
 requires = ["poetry-core"]
