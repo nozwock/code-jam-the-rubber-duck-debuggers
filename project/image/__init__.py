@@ -1,29 +1,25 @@
 import numpy
-from encoder_interface import EncoderInterface
-from encoder_impl import EncoderImpl
+from project.image.encoders.encoder_interface import EncoderInterface
 
 
 class Image:
     width = None
     height = None
     pixel_array = None
-    encoder = None
 
-    def __init__(self, pixel_array: numpy.ndarray,encoder: EncoderInterface):
+    def __init__(self, pixel_array: numpy.ndarray):
         if len(pixel_array.shape) != 3:
             raise Exception(f"Unexpected pixel_arr shape: array has {len(pixel_array.shape)} dimensions, but expected 3")
 
         self.pixel_array = pixel_array
         self.height = self.pixel_array.shape[0]
         self.width = self.pixel_array.shape[1]
-        self.encoder = encoder
-
         print("Created Instance")
 
-    def encode(self) -> None:
+    def encode(self, encoder: EncoderInterface) -> None:
         pass
 
-    def decode(self) -> None:
+    def decode(self, encoder: EncoderInterface) -> None:
         pass
 
 
@@ -33,7 +29,5 @@ def read_image(filepath: str) -> Image:
 
     shape = (1, 1, 1)
     pixel_array = numpy.zeros(shape)
-    encoder = EncoderImpl()
 
-    return Image(pixel_array, encoder)
-
+    return Image(pixel_array)
