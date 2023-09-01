@@ -45,6 +45,9 @@ class Image:
 
         return Image(data)
 
+    def save(self) -> None:
+        pass
+
 
 if __name__ == "__main__":
     image = Image.read_image("./image.jpg")
