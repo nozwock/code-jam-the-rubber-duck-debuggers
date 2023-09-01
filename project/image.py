@@ -18,33 +18,33 @@ class EncoderInterface(typing.Protocol):
 class Image:
     width = None
     height = None
-    data = None
+    img = None
 
-    def __init__(self, data: numpy.ndarray):
+    def __init__(self, img: numpy.ndarray):
         # if len(pixel_array.shape) != 3:
         #     raise Exception(f"Unexpected pixel_arr shape: array has {len(pixel_array.shape)} dimensions, but expected 3")
 
-        self.data = data
-        self.height = self.data.shape[0]
-        self.width = self.data.shape[1]
+        self.img = img
+        self.height = self.img.shape[0]
+        self.width = self.img.shape[1]
 
     @staticmethod
-    def encode(self, encoder: EncoderInterface) -> Image:
-        pass
+    def encode(encoder: EncoderInterface) -> Image:
+        return encoder.encode()
 
-    def decode(self, encoder: EncoderInterface, data: numpy.ndarray) -> str:
-        pass
+    def decode(self, encoder: EncoderInterface) -> str:
+        return encoder.decode(self.img)
 
+    @staticmethod
+    def read_image(filepath: str) -> Image:
+        pathlib_path = Path(filepath)
+        if not(pathlib_path.exists()) or not(pathlib_path.is_file()):
+            raise Exception(f"Invalid filepath provided: {filepath}")
 
-def read_image(filepath: str) -> Image:
-    pathlib_path = Path(filepath)
-    if not(pathlib_path.exists()) or not(pathlib_path.is_file()):
-        raise Exception(f"Invalid filepath provided: {filepath}")
+        data = cv2.imread(str(pathlib_path))
 
-    data = cv2.imread(str(pathlib_path))
-
-    return Image(data)
+        return Image(data)
 
 
 if __name__ == "__main__":
-    image = read_image("image/")
+    image = Image.read_image("./image.jpg")
