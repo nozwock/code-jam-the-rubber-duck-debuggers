@@ -36,7 +36,7 @@ class Image:
 
     @classmethod
     def read(cls, path: Path) -> Image:
-        data = cv2.imread(str(path))
+        data = cv2.imread(str(path), cv2.IMREAD_UNCHANGED)
         return cls(data)
 
     def save(self, filename: str) -> None:
