@@ -40,8 +40,10 @@ class Image:
         return cls(data)
 
     def save(self, filename: str) -> None:
-        pass
+        cv2.imwrite(filename, self.img)
 
 
 if __name__ == "__main__":
     image = Image.read(Path("./image.jpg"))
+    image.save("image1.jpg")
+    
