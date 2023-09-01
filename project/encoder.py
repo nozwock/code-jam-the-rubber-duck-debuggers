@@ -38,5 +38,5 @@ def encode_text_to_image(
 
 if __name__ == "__main__":
     cv2.imwrite(
-        "output.png", img=encode_text_to_image("hello world", channels=4, width_limit=4)
+        "output.png", img=encode_text_to_image("hello world", channels=4, width_limit=3)
     )
