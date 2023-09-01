@@ -2,7 +2,6 @@
 
 import math
 
-import cv2
 import numpy as np
 
 Image = np.ndarray
@@ -38,6 +37,8 @@ def encode_text_to_image(
 
 if __name__ == "__main__":
     # Example
+    import cv2
+
     cv2.imwrite(
         "output.png", img=encode_text_to_image("hello world", channels=4, width_limit=3)
     )
