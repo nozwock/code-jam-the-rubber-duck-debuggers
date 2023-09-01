@@ -9,21 +9,21 @@ from pathlib import Path
 class Image:
     width = None
     height = None
-    pixel_array = None
+    data = None
 
-    def __init__(self, pixel_array: numpy.ndarray):
+    def __init__(self, data: numpy.ndarray):
         # if len(pixel_array.shape) != 3:
         #     raise Exception(f"Unexpected pixel_arr shape: array has {len(pixel_array.shape)} dimensions, but expected 3")
 
-        self.pixel_array = pixel_array
-        self.height = self.pixel_array.shape[0]
-        self.width = self.pixel_array.shape[1]
+        self.data = data
+        self.height = self.data.shape[0]
+        self.width = self.data.shape[1]
         print("Created Instance")
 
     def encode(self, encoder: EncoderInterface) -> typing.Self:
         pass
 
-    def decode(self, encoder: EncoderInterface) -> None:
+    def decode(self, encoder: EncoderInterface, data: numpy.ndarray) -> None:
         pass
 
 
