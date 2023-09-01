@@ -1,49 +1,55 @@
 from __future__ import annotations
 
-import typing
-
-import numpy
-import cv2
-
 from pathlib import Path
+from typing import Protocol
+
+import cv2
+import numpy as np
 
 
-class EncoderInterface(typing.Protocol):
-    def encode(self) -> Image: ...
+class EncoderInterface(Protocol):
+    """A standardized interface for encoding text within images."""
 
-    def decode(self, img: numpy.ndarray) -> str: ...
+    def encode(self) -> Image:
+        """An interface method for encoding text into an image."""
+        ...
+
+    def decode(self, img: np.ndarray) -> str:
+        """An interface method for decoding text from an image."""
+        ...
 
 
 class Image:
-    width = None
-    height = None
-    img = None
+    """A basic image class that implements fundamental methods."""
 
-    def __init__(self, img: numpy.ndarray):
-        # if len(pixel_array.shape) != 3:
-        #     raise Exception(f"Unexpected pixel_arr shape: array has {len(pixel_array.shape)} dimensions, but expected 3")
+    def __init__(self, img: np.ndarray):
+        # dimensions = len(img.shape)
+        # if dimensions != 3:
+        #     raise Exception(f"{dimensions=}, Image must have 3 dimensions.")
 
         self.img = img
-        self.height = self.img.shape[0]
-        self.width = self.img.shape[1]
 
     @staticmethod
     def encode(encoder: EncoderInterface) -> Image:
+        """A method for text encoding within an image using the provided encoder."""
         return encoder.encode()
 
     def decode(self, encoder: EncoderInterface) -> str:
+        """A method for decoding text from an image using the provided encoder."""
         return encoder.decode(self.img)
 
     @classmethod
     def read(cls, path: Path) -> Image:
-        data = cv2.imread(str(path), cv2.IMREAD_UNCHANGED)
-        return cls(data)
+        """A method to read an image from disk and create an Image object."""
+        # NOTE: Don't prefer writing docs for self explanatory methods like these,
+        # should probably disbale lints for these?
+        return cls(img=cv2.imread(str(path), cv2.IMREAD_UNCHANGED))
 
-    def save(self, filename: str) -> None:
-        cv2.imwrite(filename, self.img)
+    def save(self, path: Path) -> None:
+        """A method for saving an image to disk."""
+        cv2.imwrite(str(path), self.img)
 
 
 if __name__ == "__main__":
-    image = Image.read(Path("./image.jpg"))
-    image.save("image1.jpg")
-    
+    image = Image.read(Path("image.jpg"))
+    image.save(Path("image1.jpg"))
