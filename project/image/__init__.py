@@ -29,7 +29,7 @@ class Image:
 
 def read_image(filepath: str) -> Image:
     pathlib_path = Path(filepath)
-    if not(pathlib_path.exists()):
+    if not(pathlib_path.exists()) or not(pathlib_path.is_file()):
         raise Exception(f"Invalid filepath provided: {filepath}")
 
     shape = (1, 1, 1)
