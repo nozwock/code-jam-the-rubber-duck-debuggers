@@ -1,7 +1,7 @@
 """Encode text to image."""
 import cv2
 import numpy as np
-from math import ceil
+import math
 Image = np.ndarray
 
 
@@ -18,8 +18,8 @@ def encode_text_to_image(
     data = text.encode(encoding)
     image = np.array(list(data), dtype=np.uint8)
 
-    height = ceil(len(data) / (abs(width_limit) * channels)) if width_limit else 1
-    width = ceil(len(data) / (height * channels))
+    height = math.ceil(len(data) / (abs(width_limit) * channels)) if width_limit else 1
+    width = math.ceil(len(data) / (height * channels))
     pad_count = height * width * channels - len(data)
 
     if pad_count:
