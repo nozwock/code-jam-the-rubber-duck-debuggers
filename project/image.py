@@ -5,7 +5,6 @@ import typing
 import numpy
 import cv2
 
-# from project.image.encoders.iface import EncoderInterface
 from pathlib import Path
 
 
@@ -35,19 +34,14 @@ class Image:
     def decode(self, encoder: EncoderInterface) -> str:
         return encoder.decode(self.img)
 
-    @staticmethod
-    def read_image(filepath: str) -> Image:
-        pathlib_path = Path(filepath)
-        if not(pathlib_path.exists()) or not(pathlib_path.is_file()):
-            raise Exception(f"Invalid filepath provided: {filepath}")
+    @classmethod
+    def read(cls, path: Path) -> Image:
+        data = cv2.imread(str(path))
+        return cls(data)
 
-        data = cv2.imread(str(pathlib_path))
-
-        return Image(data)
-
-    def save(self) -> None:
+    def save(self, filename: str) -> None:
         pass
 
 
 if __name__ == "__main__":
-    image = Image.read_image("./image.jpg")
+    image = Image.read(Path("./image.jpg"))
