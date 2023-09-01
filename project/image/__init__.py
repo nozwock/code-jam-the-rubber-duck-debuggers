@@ -23,7 +23,7 @@ class Image:
     def encode(self, encoder: EncoderInterface) -> typing.Self:
         pass
 
-    def decode(self, encoder: 'EncoderInterface') -> None:
+    def decode(self, encoder: EncoderInterface) -> None:
         pass
 
 

@@ -1,8 +1,7 @@
 from typing import Protocol
-from project.image import Image
 
 
 class EncoderInterface(Protocol):
-    def encode(self) -> Image: ...
+    def encode(self) -> None: ...
 
     def decode(self) -> None: ...
