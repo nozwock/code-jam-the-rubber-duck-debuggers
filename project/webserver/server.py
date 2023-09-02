@@ -14,7 +14,7 @@ class WebServer(object):
         self.configure_endpoints()
 
     def configure_endpoints(self):
-        """ Adds all url endpoint with their respective server function. """
+        """Adds all url endpoint with their respective server function."""
         self.add_endpoint('/', 'home', self.home, methods=['GET'])
 
     def configs(self, **configs):
@@ -30,14 +30,14 @@ class WebServer(object):
         self.app.run(**kwargs)
 
     def generate_token(self, length=12) -> str:
-        """ Generate a random string for a session token. """
+        """Generate a random string for a session token."""
         while True:
             random_token = ''.join([random.choice(WebServer.TOKEN_CHARS) for _ in range(length)])
             if random_token not in self.registered_tokens:
                 return random_token
 
     def has_valid_token(self, request_obj: Request) -> bool:
-        """ Check if the request contains a valid session token. """
+        """Check if the request contains a valid session token."""
         # if the request has no session_token
         if 'session_token' not in dict(request_obj.cookies):
             return False
@@ -50,7 +50,7 @@ class WebServer(object):
     # Endpoint functions #
 
     def home(self) -> str | Response:
-        """ Landing page for starting a game. """
+        """Landing page for starting a game."""
         room_id = request.args.get('r')
         if room_id:
             # player tries to access a room
