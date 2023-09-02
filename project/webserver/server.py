@@ -62,7 +62,7 @@ class WebServer(object):
                     return render_template('lobby.html')
                 elif room.playing:
                     # in-game
-                    return render_template('playing.html')
+                    return render_template(type(room).HTML_FILE)
             else:
                 # room does not exist (anymore)
                 # redirect to homepage
