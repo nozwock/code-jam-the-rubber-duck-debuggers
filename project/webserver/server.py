@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, redirect, Response, Request
+from flask import Flask, request, Request
 import string
 import random
+import json
 
 
-class WebServer(object):
+class GameApi(object):
     TOKEN_CHARS = string.ascii_letters
 
     def __init__(self, **configs):
@@ -15,7 +16,7 @@ class WebServer(object):
 
     def configure_endpoints(self):
         """Adds all url endpoint with their respective server function."""
-        self.add_endpoint('/', 'home', self.home, methods=['GET'])
+        self.add_endpoint('/api/get_room', 'home', self.get_room, methods=['GET'])
 
     def configs(self, **configs):
         for config, value in configs:
@@ -32,7 +33,7 @@ class WebServer(object):
     def generate_token(self, length=12) -> str:
         """Generate a random string for a session token."""
         while True:
-            random_token = ''.join([random.choice(WebServer.TOKEN_CHARS) for _ in range(length)])
+            random_token = ''.join([random.choice(GameApi.TOKEN_CHARS) for _ in range(length)])
             if random_token not in self.registered_tokens:
                 return random_token
 
@@ -47,33 +48,19 @@ class WebServer(object):
         # checks passed
         return True
 
-    # Endpoint functions #
+    #### API ENDPOINTS ####
 
-    def home(self) -> str | Response:
-        """Landing page for starting a game."""
-        room_id = request.args.get('r')
-        if room_id:
-            # player tries to access a room
-            if room_id in self.rooms:
-                # room exists
-                room = self.rooms[room_id]
-                if room.in_lobby:
-                    # lobby
-                    return render_template('lobby.html')
-                elif room.playing:
-                    # in-game
-                    return render_template(type(room).HTML_FILE)
-            else:
-                # room does not exist (anymore)
-                # redirect to homepage
-                return redirect('/')
+    def get_room(self):
+        """An API call to recieve the settings of a room."""
+        room_id = request.args.get('room_id')
+        if room_id and room_id in self.rooms:
+            room = self.rooms[room_id]
+            return room.dump_settings()
         else:
-            # no room in url
-            # return homepage to create new room
-            return render_template("home.html")
+            return json.dumps({"success": False, "message": "You did not provide a valid room id."})
 
 
-server = WebServer()
+api = GameApi()
 
 if __name__ == "__main__":
-    server.run(debug=True)
+    api.run(debug=True)

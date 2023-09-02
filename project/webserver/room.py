@@ -1,4 +1,5 @@
 from enum import Enum, auto
+import json
 
 
 class RoomStatuses(Enum):
@@ -22,3 +23,7 @@ class Room:
 class Classic(Room):
     """The default gamemode."""
     HTML_FILE = "classic.html"
+
+    def dump_settings(self):
+        """Dump the gamemode-specific settings for a client."""
+        return json.dumps({"max-guessing-time": 60})
