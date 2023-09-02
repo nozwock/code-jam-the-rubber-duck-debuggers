@@ -114,9 +114,15 @@ if __name__ == "__main__":
     from pathlib import Path
 
     Image.encode(TextEncoder(text="Hello, World!", width_limit=2, channels=4)).save(
-        Path("output.png")
+        Path("text_encoder_output.png")
     )
+    print(Image.read(Path("text_encoder_output.png")).decode(TextEncoder()))
 
     Image.encode(
         LsbSteganographyEncoder("Hello, World!", Image.read(Path("image.png")).img)
-    ).save(Path("lsb_stegnography_output.png"))
+    ).save(Path("lsb_stegnography_encoder_output.png"))
+    print(
+        Image.read(Path("lsb_stegnography_encoder_output.png")).decode(
+            LsbSteganographyEncoder()
+        )
+    )
