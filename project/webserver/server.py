@@ -2,6 +2,7 @@ from flask import Flask, request, Request
 import string
 import random
 import json
+import room
 
 
 class GameApi(object):
@@ -9,7 +10,7 @@ class GameApi(object):
 
     def __init__(self, **configs):
         self.registered_tokens = {}
-        self.rooms = {}
+        self.rooms = {"secret-dog": room.Classic()}
         self.configs(**configs)
         self.app = Flask(__name__)
         self.configure_endpoints()
@@ -58,6 +59,10 @@ class GameApi(object):
             return room.dump_settings()
         else:
             return json.dumps({"success": False, "message": "You did not provide a valid room id."})
+
+    def create_room(self):
+        """Create a room, based on the gamemode's name."""
+        ...
 
 
 api = GameApi()
