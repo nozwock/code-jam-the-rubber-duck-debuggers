@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, redirect, Response, Request
 import string
 import random
+
+from flask import Flask, Response, Request, request, render_template, redirect
 
 
 class WebServer(object):
