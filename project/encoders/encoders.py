@@ -2,7 +2,7 @@ import math
 
 import numpy as np
 
-from project.image import EncoderInterface, Image
+from project.encoders.image import EncoderInterface, Image
 
 
 class TextEncoder(EncoderInterface):
