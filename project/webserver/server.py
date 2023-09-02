@@ -47,7 +47,6 @@ class WebServer(object):
   
   #### Endpoint functions ####
 
-
   def home(self) -> str:
     ''' Landing page for starting a game. '''
     room_id = request.args.get('r')
