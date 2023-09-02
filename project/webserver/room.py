@@ -21,6 +21,7 @@ class Room:
 
 #### GAMEMODES ####
 
+
 class Classic(Room):
     """The default gamemode."""
 
