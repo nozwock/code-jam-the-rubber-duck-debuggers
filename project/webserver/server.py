@@ -1,8 +1,8 @@
-from flask import Flask, request, Request
+from flask import Flask, request, Request, Response, render_template
 import string
 import random
-import json
 import room
+from flask_socketio import SocketIO
 
 
 class GameModeNotFoundError(Exception):
@@ -17,12 +17,19 @@ class GameApi(object):
         self.rooms = {"secret-dog": room.Classic()}
         self.configs(**configs)
         self.app = Flask(__name__)
+        self.socketio = SocketIO()
+        self.socketio.init_app(self.app, cors_allowed_origins="http://127.0.0.1:5000")
         self.configure_endpoints()
+        socketio = self.socketio
+        @socketio.on("connect")
+        def handle_connect():
+            print('Client connected')
 
     def configure_endpoints(self):
         """Adds all url endpoint with their respective server function."""
-        self.add_endpoint('/api/get_room_settings', 'home', self.get_room_settings, methods=['GET'])
+        self.add_endpoint('/api/get_room_settings', 'room_settings', self.get_room_settings, methods=['GET'])
         self.add_endpoint('/api/create_room', 'create_room', self.create_room, methods=['POST'])
+        self.add_endpoint('/', 'homepage', self.homepage, methods=['GET'])
 
         self.app.after_request(self.after_request)
 
@@ -45,7 +52,7 @@ class GameApi(object):
             if random_token not in self.registered_tokens:
                 return random_token
 
-    def get_player_token(self, request: object) -> str:
+    def get_player_token(self, request: Request) -> str:
         return request.cookies['token']
 
     def has_valid_token(self, request_obj: Request) -> bool:
@@ -68,8 +75,10 @@ class GameApi(object):
         raise GameModeNotFoundError
 
     #### API ENDPOINTS ####
+    def homepage(self):
+        return render_template('home.html')
 
-    def after_request(self, response):
+    def after_request(self, response: Response):
         """Validate the response before sending to the client."""
         print(request.cookies)
         if not request.cookies.get('token'):
@@ -114,4 +123,4 @@ class GameApi(object):
 api = GameApi()
 
 if __name__ == "__main__":
-    api.run(debug=True)
+    api.socketio.run(api.app, debug=True)

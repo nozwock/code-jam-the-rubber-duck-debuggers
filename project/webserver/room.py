@@ -2,8 +2,10 @@ from enum import Enum, auto
 
 
 class RoomStatuses(Enum):
-    in_lobby = auto()  # waiting for people to join
-    in_game = auto()  # playing main game
+    # waiting for people to join
+    in_lobby = auto()
+    # playing main game
+    in_game = auto()
 
 
 class Room:
