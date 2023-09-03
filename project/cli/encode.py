@@ -10,9 +10,9 @@ app = typer.Typer()
 
 
 @app.command()
-def direct(text: str, output: Optional[Path] = None, encoding: str = "utf-8"):
+def direct(text: str, width_limit: Optional[int] = 0, output: Optional[Path] = None, encoding: str = "utf-8"):
     """Encode given text directly as a image"""
-    image = Image.encode(DirectEncoder(data=bytes(text, encoding)))
+    image = Image.encode(DirectEncoder(data=bytes(text, encoding), width_limit=width_limit))
 
     save_to = Path("output.png") if output is None else output
     image.save(save_to)
