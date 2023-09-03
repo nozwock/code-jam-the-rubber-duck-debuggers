@@ -1529,29 +1529,4 @@ watchdog = ["watchdog (>=2.3)"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.12"
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 content-hash = "a33f25bf3b60575b6bf845c75a03b461df1c824d9ddf5d6920a392413231ca13"
-=======
-content-hash = "b5bf9b44b4ae522231ae0888798e45fc4be17f51dd32f552775e8ff24f9b54fb"
->>>>>>> nozwock-main
-=======
-content-hash = "b5bf9b44b4ae522231ae0888798e45fc4be17f51dd32f552775e8ff24f9b54fb"
-=======
-content-hash = "a33f25bf3b60575b6bf845c75a03b461df1c824d9ddf5d6920a392413231ca13"
->>>>>>> 2ab0ba3 (fix: Add rich to project for beautiful progress bars)
->>>>>>> Stashed changes
-=======
-content-hash = "b5bf9b44b4ae522231ae0888798e45fc4be17f51dd32f552775e8ff24f9b54fb"
-=======
-content-hash = "a33f25bf3b60575b6bf845c75a03b461df1c824d9ddf5d6920a392413231ca13"
->>>>>>> 2ab0ba3 (fix: Add rich to project for beautiful progress bars)
->>>>>>> Stashed changes
-=======
-content-hash = "b5bf9b44b4ae522231ae0888798e45fc4be17f51dd32f552775e8ff24f9b54fb"
-=======
-content-hash = "a33f25bf3b60575b6bf845c75a03b461df1c824d9ddf5d6920a392413231ca13"
->>>>>>> 2ab0ba3 (fix: Add rich to project for beautiful progress bars)
->>>>>>> Stashed changes
