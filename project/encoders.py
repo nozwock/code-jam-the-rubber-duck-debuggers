@@ -79,7 +79,7 @@ class LsbSteganographyEncoder(EncoderInterface):
                 "Can't fit the data within the image with the current implementation."
             )
 
-        for i in track(range(channels.shape[0]), description="Encoding to image..."):
+        for i in range(channels.shape[0]):
             try:
                 channels[i] = (channels[i] & ~1) | data_bits.pop(0)
             except IndexError:
