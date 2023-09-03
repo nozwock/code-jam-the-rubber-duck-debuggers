@@ -1,15 +1,17 @@
 import random
 import string
+from typing import Type
 
-import room
 from flask import Flask, Request, request
+
+from . import room
 
 
 class GameModeNotFoundError(Exception):
     ...
 
 
-class GameApi(object):
+class GameApi:
     TOKEN_CHARS = string.ascii_letters
 
     def __init__(self, **configs):
@@ -61,7 +63,7 @@ class GameApi(object):
             if random_token not in self.registered_tokens:
                 return random_token
 
-    def get_player_token(self, request: object) -> str:
+    def get_player_token(self, request: Request) -> str:
         return request.cookies["token"]
 
     def has_valid_token(self, request_obj: Request) -> bool:
@@ -77,7 +79,7 @@ class GameApi(object):
         # checks passed
         return True
 
-    def get_gamemode(self, gamemode_name: str) -> object:
+    def get_gamemode(self, gamemode_name: str) -> Type[room.RoomInterface]:
         """Get a room class by the gamemodes name."""
         for gamemode in room.GAMEMODES:
             if gamemode.__name__ == gamemode_name:
@@ -110,9 +112,12 @@ class GameApi(object):
         gamemode_name = data["gamemode"]
         # create room
         try:
-            Gamemode = self.get_gamemode(gamemode_name)
-            room = Gamemode()
-            return {"success": True, "message": "Success!", "room_id": room.id}
+            game_room = self.get_gamemode(gamemode_name)()
+            return {
+                "success": True,
+                "message": "Success!",
+                "room_id": game_room.id,
+            }
         except GameModeNotFoundError:
             return {"success": False, "message": "Gamemode was not found!"}
 
