@@ -43,7 +43,7 @@ class DirectEncoder(EncoderInterface):
         return Image(img=image.reshape(height, width, channels))
 
     def decode(self, img: np.ndarray) -> bytes:
-        """Decodes data in raw bytes from an image."""
+        """Decodes data from an image."""
         return img.tobytes()
 
 
@@ -113,7 +113,7 @@ if __name__ == "__main__":
 
     # NOTE: `image.png` needs to be in the cwd for this to work!
     steganography_encoder = LsbSteganographyEncoder(
-        b"Hello, World!", Image.read(Path("image.png")).img
+        b"Hello, World!", Image.read(Path("image.png")).as_array()
     )
     Image.encode(steganography_encoder).save(
         Path("lsb_stegnography_encoder_output.png")

@@ -49,6 +49,9 @@ class Image:
         """A method for saving an image to disk."""
         cv2.imwrite(str(path), self.img)
 
+    def as_array(self) -> np.ndarray:
+        return self.img
+
 
 if __name__ == "__main__":
     image = Image.read(Path("image.jpg"))
