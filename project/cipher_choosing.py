@@ -23,9 +23,7 @@ def encrypt_ceaser(text: str, password: int) -> str:
         if unicode_letter >= 65 and unicode_letter <= 90:  # Capital Letters
             unicode_letter += password
             if unicode_letter > 90:
-                # print(unicode_letter)
                 unicode_letter -= 26
-                # print(unicode_letter)
         elif unicode_letter >= 97 and unicode_letter <= 122:  # Small Letters
             unicode_letter += password
             if unicode_letter > 122:
@@ -34,5 +32,25 @@ def encrypt_ceaser(text: str, password: int) -> str:
     return (cipher)
 
 
+def decrypt_ceaser(cipher: str, password: int) -> str:
+    """Decrypts message using ceaser cipher"""
+    password = password % 26
+    text = ""
+    # A would be 3 = D
+    for letter in cipher:
+        unicode_letter = ord(letter)
+        if unicode_letter >= 65 and unicode_letter <= 90:  # Capital Letters
+            unicode_letter -= password
+            if unicode_letter < 65:
+                unicode_letter += 26
+        elif unicode_letter >= 97 and unicode_letter <= 122:  # Small Letters
+            unicode_letter -= password
+            if unicode_letter < 97:
+                unicode_letter += 26
+        text = text + chr(unicode_letter)
+    return (text)
+
+
 if __name__ == "__main__":
-    encrypt_ceaser("abcde vwxyz", 4)
+    print(decrypt_ceaser("ABCDE VWXYZ", 5))
+    print(encrypt_ceaser("Hello World", 4))
