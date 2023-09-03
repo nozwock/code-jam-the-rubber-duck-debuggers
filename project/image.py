@@ -41,8 +41,6 @@ class Image:
     @classmethod
     def read(cls, path: Path) -> Image:
         """A method to read an image from disk and create an Image object."""
-        # NOTE: Don't prefer writing docs for self explanatory methods like these,
-        # should probably disbale lints for these?
         return cls(img=cv2.imread(str(path), cv2.IMREAD_UNCHANGED))
 
     def save(self, path: Path) -> None:
