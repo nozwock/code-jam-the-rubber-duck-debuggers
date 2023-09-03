@@ -8,14 +8,14 @@ import numpy as np
 
 
 class EncoderInterface(Protocol):
-    """A standardized interface for encoding text within images."""
+    """A standardized interface for encoding data within images."""
 
     def encode(self) -> Image:
-        """An interface method for encoding text into an image."""
+        """An interface method for encoding data into an image."""
         ...
 
-    def decode(self, img: np.ndarray) -> str:
-        """An interface method for decoding text from an image."""
+    def decode(self, img: np.ndarray) -> bytes:
+        """An interface method for decoding data from an image."""
         ...
 
 
@@ -34,8 +34,8 @@ class Image:
         """A method for text encoding within an image using the provided encoder."""
         return encoder.encode()
 
-    def decode(self, encoder: EncoderInterface) -> str:
-        """A method for decoding text from an image using the provided encoder."""
+    def decode(self, encoder: EncoderInterface) -> bytes:
+        """A method for decoding data from an image using the provided encoder."""
         return encoder.decode(self.img)
 
     @classmethod
