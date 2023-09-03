@@ -75,7 +75,7 @@ class LsbSteganographyEncoder(EncoderInterface):
 
         if len(data_bits) > len(channels) * 8:
             raise Exception(
-                "Can't fit the text within the image with the current implementation."
+                "Can't fit the data within the image with the current implementation."
             )
 
         for i in range(channels.shape[0]):
