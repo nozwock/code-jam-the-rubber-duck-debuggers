@@ -11,10 +11,11 @@ be chosen by the encrypter."""
 
     Ceaser = 1
     Transposition = 2
-    Subsitution = 3
-    Vigenere = 4
-    Playfair = 5
-    Hill_Cipher = 6
+    AES = 3
+    Subsitution = 4
+    Vigenere = 5
+    Playfair = 6
+    Hill_Cipher = 7
 
 
 def encrypt_ceaser(text: str, password: int) -> str:
