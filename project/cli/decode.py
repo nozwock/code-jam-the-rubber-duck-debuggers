@@ -9,16 +9,18 @@ app = typer.Typer()
 
 
 @app.command()
-def direct(path: Path, encoding="utf-8"):
-    image = Image.read(path)
-    print(image.decode(DirectEncoder()).decode(encoding=encoding))
+def direct(img: Path, encoding="utf-8"):
+    text = Image.read(img).decode(DirectEncoder()).decode(encoding=encoding)
+
+    print(f"Decoded text:\n{text}")
 
 
 @app.command()
-def stegangography(path: Path, encoding="utf-8"):
-    image = Image.read(path)
-    print(
-        image.decode(LsbSteganographyEncoder(img=image.as_array())).decode(
-            encoding=encoding
-        )
+def stegangography(img: Path, encoding="utf-8"):
+    text = (
+        Image.read(img)
+        .decode(LsbSteganographyEncoder(img=Image.read(img).as_array()))
+        .decode(encoding=encoding)
     )
+
+    print(f"Decoded text:\n{text}")

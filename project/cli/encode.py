@@ -10,22 +10,28 @@ app = typer.Typer()
 
 
 @app.command()
-def direct(path: Path, text: str, encoding: str = "utf-8"):
+def direct(text: str, output: Optional[Path] = None, encoding: str = "utf-8"):
     """Encode given text directly as a image"""
     image = Image.encode(DirectEncoder(data=bytes(text, encoding)))
-    image.save(path)
+
+    save_to = Path("output.png") if output is None else output
+    image.save(save_to)
+
+    print(f"Image saved as: {save_to}")
 
 
 @app.command()
 def stegangography(
-    path: Path, text: str, encoding: str = "utf-8", output: Optional[Path] = None
+    text: str, img: Path, output: Optional[Path] = None, encoding: str = "utf-8"
 ):
     """Encode the text to be hidden in the given image"""
-    image = Image.read(path)
-    image = image.encode(
-        LsbSteganographyEncoder(data=bytes(text, encoding), img=image.img)
+    image = Image.encode(
+        LsbSteganographyEncoder(
+            data=bytes(text, encoding), img=Image.read(img).as_array()
+        )
     )
-    if not output:
-        image.save(Path("output.png"))
-    else:
-        image.save(output)
+
+    save_to = Path("output.png") if output is None else output
+    image.save(save_to)
+
+    print(f"Image saved as: {save_to}")
