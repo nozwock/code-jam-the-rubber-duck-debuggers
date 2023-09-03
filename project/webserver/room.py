@@ -1,4 +1,5 @@
 from enum import Enum, auto
+from typing import Protocol
 
 
 class RoomStatuses(Enum):
@@ -8,25 +9,17 @@ class RoomStatuses(Enum):
     in_game = auto()
 
 
-class Room:
-    """An object that handles one individual lobby and game."""
-    def __init__(self):
-        self.status = RoomStatuses.in_lobby
+class RoomInterface(Protocol):
+    """A standardized interface for handling games."""
 
-    @property
-    def in_lobby(self) -> bool:
-        """Returns if the players are in the lobby."""
-        return self.status == RoomStatuses.in_lobby
-
-    @property
-    def in_game(self) -> bool:
-        """Returns if the game has started already."""
-        return self.status == RoomStatuses.in_game
+    def join(self) -> bool:
+        """An interface method for joining the room."""
+        ...
 
 
 #### GAMEMODES ####
 
-class Classic(Room):
+class Classic(RoomInterface):
     """The default gamemode."""
 
     def get_settings(self):
