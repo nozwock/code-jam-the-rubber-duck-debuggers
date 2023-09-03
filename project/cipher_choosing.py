@@ -1,8 +1,8 @@
-from enum import Enum
+import hashlib
 import os
+from enum import Enum
 from binascii import hexlify, unhexlify
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-import hashlib
 
 
 class Cipher(Enum):
@@ -32,7 +32,7 @@ def encrypt_ceaser(text: str, password: int) -> str:
             if unicode_letter > 122:
                 unicode_letter -= 26
         cipher = cipher + chr(unicode_letter)
-    return (cipher)
+    return cipher
 
 
 def decrypt_ceaser(cipher: str, password: int) -> str:
@@ -51,7 +51,7 @@ def decrypt_ceaser(cipher: str, password: int) -> str:
             if unicode_letter < 97:
                 unicode_letter += 26
         text = text + chr(unicode_letter)
-    return (text)
+    return text
 
 
 def encrypt_transposition(text: str, password: str) -> str:
@@ -60,7 +60,7 @@ def encrypt_transposition(text: str, password: str) -> str:
         int(password)
     except ValueError:
         # get the order for the string coverage
-        password = (list(password))
+        password = list(password)
     else:
         # get the order for the number coverage
         password = list(set(int(digits) for digits in str(password)))
@@ -85,9 +85,11 @@ def encrypt_aes(text: str, password: str) -> str:
     iv = os.urandom(12)
     text = text.encode("utf8")
     ciphertext = aes.encrypt(iv, text, None)
-    return "%s-%s-%s" % (hexlify(salt).decode("utf8"),
-                         hexlify(iv).decode("utf8"),
-                         hexlify(ciphertext).decode("utf8"))
+    return "%s-%s-%s" % (
+        hexlify(salt).decode("utf8"),
+        hexlify(iv).decode("utf8"),
+        hexlify(ciphertext).decode("utf8")
+    )
 
 
 def decrypt_aes(cipher: str, password: str) -> str:

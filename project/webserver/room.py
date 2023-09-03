@@ -8,7 +8,7 @@ class RoomStatuses(Enum):
 
 class Room:
     """An object that handles one individual lobby and game."""
-    
+
     def __init__(self):
         self.status = RoomStatuses.in_lobby
 
@@ -19,6 +19,8 @@ class Room:
 
 #### GAMEMODES ####
 
+
 class Classic(Room):
     """The default gamemode."""
+
     HTML_FILE = "classic.html"
