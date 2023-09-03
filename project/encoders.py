@@ -3,7 +3,7 @@ import math
 import numpy as np
 from bitarray import bitarray
 
-from project.encoders.image import EncoderInterface, Image
+from project.image import EncoderInterface, Image
 
 
 class TextEncoder(EncoderInterface):
@@ -11,8 +11,8 @@ class TextEncoder(EncoderInterface):
 
     def __init__(
         self,
-        *,
         text: str | None = None,
+        *,
         encoding: str = "utf-8",
         width_limit: int = 0,
         channels: int = 3,
@@ -101,9 +101,9 @@ class LsbSteganographyEncoder(EncoderInterface):
 
             if (
                 len(data) % 8 == 0
-                and data[-len(self.message_end) * 8:].tobytes() == self.message_end
+                and data[-len(self.message_end) * 8 :].tobytes() == self.message_end
             ):
-                del data[-len(self.message_end) * 8:]
+                del data[-len(self.message_end) * 8 :]
                 break
 
         return data.tobytes().decode(encoding=self.encoding)
