@@ -1,37 +1,53 @@
 from enum import Enum, auto
+from typing import Protocol, Type
 
 
-class RoomStatuses(Enum):
-    in_lobby = auto()  # waiting for people to join
-    in_game = auto()  # playing main game
+class RoomStatus(Enum):
+    LOBBY = auto()
+    INGAME = auto()
 
 
-class Room:
-    """An object that handles one individual lobby and game."""
-
-    def __init__(self):
-        self.status = RoomStatuses.in_lobby
+class RoomInterface(Protocol):
+    id: str
 
     @property
     def in_lobby(self) -> bool:
         """Returns if the players are in the lobby."""
-        return self.status == RoomStatuses.in_lobby
+        ...
 
     @property
     def in_game(self) -> bool:
         """Returns if the game has started already."""
-        return self.status == RoomStatuses.in_game
+        ...
+
+    def get_settings(self) -> dict:
+        """Dump the gamemode-specific settings for a client."""
+        ...
 
 
 #### GAMEMODES ####
 
 
-class Classic(Room):
+class ClassicRoom(RoomInterface):
     """The default gamemode."""
 
-    def get_settings(self):
+    def __init__(self):
+        self.id = "ClassicRoom"
+        self.status = RoomStatus.LOBBY
+
+    @property
+    def in_lobby(self) -> bool:
+        """Returns if the players are in the lobby."""
+        return self.status == RoomStatus.LOBBY
+
+    @property
+    def in_game(self) -> bool:
+        """Returns if the game has started already."""
+        return self.status == RoomStatus.INGAME
+
+    def get_settings(self) -> dict:
         """Dump the gamemode-specific settings for a client."""
         return {"max-guessing-time": 60}
 
 
-GAMEMODES = [Classic]
+GAMEMODES: list[Type[RoomInterface]] = [ClassicRoom]
