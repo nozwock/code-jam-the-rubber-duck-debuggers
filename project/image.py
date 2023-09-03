@@ -23,9 +23,9 @@ class Image:
     """A basic image class that implements fundamental methods."""
 
     def __init__(self, img: np.ndarray):
-        # dimensions = len(img.shape)
-        # if dimensions != 3:
-        #     raise Exception(f"{dimensions=}, Image must have 3 dimensions.")
+        dimensions = len(img.shape)
+        if dimensions != 3:
+            raise Exception(f"{dimensions=}, Image must have 3 dimensions.")
 
         self.img = img
 
