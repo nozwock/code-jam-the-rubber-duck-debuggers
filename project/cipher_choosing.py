@@ -12,10 +12,9 @@ be chosen by the encrypter."""
     Ceaser = 1
     Transposition = 2
     AES = 3
-    Subsitution = 4
-    Vigenere = 5
-    Playfair = 6
-    Hill_Cipher = 7
+    Vigenere = 4
+    Playfair = 5
+    Hill_Cipher = 6
 
 
 def encrypt_ceaser(text: str, password: int) -> str:
@@ -40,7 +39,6 @@ def decrypt_ceaser(cipher: str, password: int) -> str:
     """Decrypts message using ceaser cipher"""
     password = password % 26
     text = ""
-    # A would be 3 = D
     for letter in cipher:
         unicode_letter = ord(letter)
         if unicode_letter >= 65 and unicode_letter <= 90:  # Capital Letters
@@ -103,7 +101,33 @@ def decrypt_aes(cipher: str, password: str) -> str:
     return plaintext.decode("utf8")
 
 
+def encrypt_vigenere(text: str, password: str) -> str:
+    """Encrypts message using vigenere cipher"""
+    cipher = ""
+    while len(password) < len(text):
+        password += password
+    for count, letter in enumerate(text, 0):
+        unicode_letter = ord(letter)
+        unicode_password = ord(password[count])
+        if unicode_password >= 65 and unicode_password <= 90:
+            unicode_password = unicode_password % 65
+        if unicode_password >= 97 and unicode_password <= 122:
+            unicode_password = unicode_password % 97
+        if unicode_letter >= 65 and unicode_letter <= 90:  # Capital Letters
+            unicode_letter += unicode_password
+            if unicode_letter > 90:
+                unicode_letter -= 26
+        elif unicode_letter >= 97 and unicode_letter <= 122:  # Small Letters
+            unicode_letter += unicode_password
+            if unicode_letter > 122:
+                unicode_letter -= 26
+        cipher = cipher + chr(unicode_letter)
+    return cipher
+
+
 if __name__ == "__main__":
-    cipher = encrypt_aes("duniya", "hello")
-    print(cipher)
-    print(decrypt_aes(cipher, "hello"))
+    # cipher = encrypt_aes("duniya", "hello")
+    # print(cipher)
+    # print(decrypt_aes(cipher, "hello"))
+    print(encrypt_vigenere("ATTACKATDAWN", "LEMON"))
+    print(encrypt_vigenere("attaCKatdawn", "LeMon"))
