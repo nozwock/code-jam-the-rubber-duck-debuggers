@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -27,7 +28,8 @@ def direct(
     save_to = Path("output.png") if output is None else output
     image.save(save_to)
 
-    print(f"Image saved as: {save_to}")
+    typer.echo("Image saved as: ", sys.stderr, nl=False)
+    typer.echo(save_to)
 
 
 @app.command()
@@ -44,4 +46,5 @@ def steganography(
     save_to = Path("output.png") if output is None else output
     image.save(save_to)
 
-    print(f"Image saved as: {save_to}")
+    typer.echo("Image saved as: ", sys.stderr, nl=False)
+    typer.echo(save_to)
