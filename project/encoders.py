@@ -2,7 +2,6 @@ import math
 
 import numpy as np
 from bitarray import bitarray
-from rich.progress import track
 
 from project.image import EncoderInterface, Image
 
@@ -92,20 +91,16 @@ class LsbSteganographyEncoder(EncoderInterface):
         channels = img.flatten()
         bytes_for_data_bits = (len(channels).bit_length() + 7) // 8
         data_len_bits = bitarray()
-        for lv in track(
-            channels[: bytes_for_data_bits * 8],
-            description="Extracting bits from image...",
-        ):
+        for lv in channels[: bytes_for_data_bits * 8]:
             data_len_bits.append(lv & 1)
         data_len = int.from_bytes(
             data_len_bits.tobytes(), "big"
         )  # number of bytes in data
 
         data = bitarray()
-        for lv in track(
-            channels[bytes_for_data_bits * 8 : bytes_for_data_bits * 8 + data_len * 8],
-            description="Combining bits...",
-        ):
+        for lv in channels[
+            bytes_for_data_bits * 8 : bytes_for_data_bits * 8 + data_len * 8
+        ]:
             data.append(lv & 1)
 
         return data.tobytes()
