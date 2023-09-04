@@ -1,6 +1,6 @@
+import base64
 import hashlib
 import os
-from binascii import hexlify, unhexlify
 from enum import Enum
 from typing import Protocol
 
@@ -79,35 +79,34 @@ def decrypt_transposition(cipher: str, password: str) -> str:
     """Decrypts message using transposition cipher"""
 
 
-def deriveKey_aes(password: str, salt: bytes = None) -> [str, bytes]:
+def deriveKey_aes(password: str, salt: bytes | None = None) -> tuple[bytes, bytes]:
     """Derives key for AES"""
     if salt is None:
-        salt = os.urandom(8)
-    return hashlib.pbkdf2_hmac("sha256", password.encode("utf8"), salt, 1000), salt
+        salt = os.urandom(16)
+    return hashlib.pbkdf2_hmac("sha256", password.encode("utf8"), salt, 500_000), salt
 
 
 def encrypt_aes(text: str, password: str) -> str:
     """Encrypts message using AES cipher"""
     key, salt = deriveKey_aes(password)
     aes = AESGCM(key)
-    iv = os.urandom(12)
-    text = text.encode("utf8")
-    ciphertext = aes.encrypt(iv, text, None)
-    return "%s-%s-%s" % (
-        hexlify(salt).decode("utf8"),
-        hexlify(iv).decode("utf8"),
-        hexlify(ciphertext).decode("utf8"),
+    nonce = os.urandom(12)
+    data = text.encode()
+    ciphertext = aes.encrypt(nonce, data, None)
+    return "{}${}${}".format(
+        base64.b64encode(salt).decode(),
+        base64.b64encode(nonce).decode(),
+        base64.b64encode(ciphertext).decode(),
     )
 
 
 def decrypt_aes(cipher: str, password: str) -> str:
     """Decrypts message using AES cipher"""
-    salt, iv, cipher = map(unhexlify, cipher.split("-"))
+    salt, nonce, cipher_data = map(base64.b64decode, cipher.split("$"))
     key, _ = deriveKey_aes(password, salt)
     aes = AESGCM(key)
-    plaintext = aes.decrypt(iv, cipher, None)
-    # aes.decrypt()
-    return plaintext.decode("utf8")
+    decrypted = aes.decrypt(nonce, cipher_data, None)
+    return decrypted.decode()
 
 
 def encrypt_vigenere(text: str, password: str) -> str:
@@ -135,8 +134,8 @@ def encrypt_vigenere(text: str, password: str) -> str:
 
 
 if __name__ == "__main__":
-    # cipher = encrypt_aes("duniya", "hello")
-    # print(cipher)
-    # print(decrypt_aes(cipher, "hello"))
-    print(encrypt_vigenere("ATTACKATDAWN", "LEMON"))
-    print(encrypt_vigenere("attaCKatdawn", "LeMon"))
+    cipher = encrypt_aes("duniya", "hello")
+    print(cipher)
+    print(decrypt_aes(cipher, "hello"))
+    # print(encrypt_vigenere("ATTACKATDAWN", "LEMON"))
+    # print(encrypt_vigenere("attaCKatdawn", "LeMon"))
