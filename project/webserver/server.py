@@ -12,8 +12,6 @@ class GameApi:
     TOKEN_CHARS = string.ascii_letters
 
     def __init__(self, **configs):
-        self.registered_tokens = {}
-        self.rooms = {"secret-dog": room.Classic()}
         self.configs(**configs)
         self.app = Flask(__name__)
         self.app.config['SECRET_KEY'] = 'secret!'

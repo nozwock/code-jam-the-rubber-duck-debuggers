@@ -22,6 +22,7 @@ numpy = "^1.25.2"
 bitarray = "^2.8.1"
 flask = "^2.3.3"
 flask-socketio = "^5.3.5"
+eventlet = "^0.33.3"
 
 [tool.poetry.group.dev.dependencies]
 # Base tools
