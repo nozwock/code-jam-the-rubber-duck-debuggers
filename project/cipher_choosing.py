@@ -1,7 +1,9 @@
 import hashlib
 import os
-from enum import Enum
 from binascii import hexlify, unhexlify
+from enum import Enum
+from typing import Protocol
+
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 
@@ -15,6 +17,13 @@ be chosen by the encrypter."""
     Vigenere = 4
     Playfair = 5
     Hill_Cipher = 6
+
+
+class KDF(Protocol):
+    salt: bytes
+
+    def hash(self, secret: bytes) -> bytes:
+        ...
 
 
 def encrypt_ceaser(text: str, password: int) -> str:
@@ -87,7 +96,7 @@ def encrypt_aes(text: str, password: str) -> str:
     return "%s-%s-%s" % (
         hexlify(salt).decode("utf8"),
         hexlify(iv).decode("utf8"),
-        hexlify(ciphertext).decode("utf8")
+        hexlify(ciphertext).decode("utf8"),
     )
 
 
