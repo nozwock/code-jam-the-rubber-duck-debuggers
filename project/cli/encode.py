@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Annotated, Optional
 
 import typer
 
@@ -13,7 +13,7 @@ app = typer.Typer()
 @app.command()
 def direct(
     text: str,
-    output: Optional[Path] = None,
+    output: Annotated[Optional[Path], typer.Option(dir_okay=False)] = None,
     width_limit: int = 0,
     channels: int = 3,
     encoding: str = "utf-8",
@@ -34,7 +34,10 @@ def direct(
 
 @app.command()
 def steganography(
-    text: str, img: Path, output: Optional[Path] = None, encoding: str = "utf-8"
+    text: str,
+    img: Annotated[Path, typer.Argument(exists=True, dir_okay=False)],
+    output: Annotated[Optional[Path], typer.Option(dir_okay=False)] = None,
+    encoding: str = "utf-8",
 ):
     """Encodes data into an image utilizing Steganography."""
     image = Image.encode(
