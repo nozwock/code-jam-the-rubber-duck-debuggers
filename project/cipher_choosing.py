@@ -1,10 +1,11 @@
 import base64
 import hashlib
 import os
+import argon2
 from enum import Enum
 from typing import Protocol
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-import argon2
+from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 
 
 class Cipher(Enum):
@@ -23,19 +24,19 @@ class KDF(Protocol):
     def hash(self, secret: bytes) -> bytes:
         ...
 
-    def base64_pad(data: str | bytes, /) -> str | bytes:
-        padding = "=" * (4 - len(data) % 4)
-        return data + padding.encode() if isinstance(data, bytes) else data + padding
 
-
-def deriveKey_pbkdf(password: str, salt: bytes | None = None) -> tuple[bytes, bytes]:
+def deriveKey_pbkdf(password: str,
+                    salt: bytes | None = None) -> tuple[bytes, bytes]:
     """Derives key for AES pbkdf"""
     if salt is None:
         salt = os.urandom(16)
-    return hashlib.pbkdf2_hmac("sha256", password.encode("utf8"), salt, 600_000), salt
+    return hashlib.pbkdf2_hmac("sha256",
+                               password.encode("utf8"),
+                               salt, 600_000), salt
 
 
-def deriveKey_Argon(password: str, salt: bytes | None = None) -> tuple[bytes, bytes]:
+def deriveKey_Argon(password: str,
+                    salt: bytes | None = None) -> tuple[bytes, bytes]:
     """Derives key for Argon"""
     if salt is None:
         salt = os.urandom(16)
@@ -65,7 +66,7 @@ def encrypt_aes_pbkdf(text: str, password: str) -> str:
     )
 
 
-def encrypt_aes_argon(text: str, password: str) -> str:
+def encrypt_aes_argon(text: str, password: str) -> bytes:
     """Encrypts message using AES cipher"""
     key, salt = deriveKey_Argon(password)
     # salt = os.urandom(16)
@@ -73,6 +74,21 @@ def encrypt_aes_argon(text: str, password: str) -> str:
     nonce = os.urandom(12)
     data = text.encode()
     ciphertext = aes.encrypt(nonce, data, None)
+    return "{}${}${}".format(
+        base64.b64encode(salt).decode(),
+        base64.b64encode(nonce).decode(),
+        base64.b64encode(ciphertext).decode(),
+    )
+
+
+def encrypt_chacha_pbkdf(text: str, password: str) -> bytes:
+    """Encrypts message using chacha cipher"""
+    key, salt = deriveKey_pbkdf(password)
+    text = bytes(text, "utf-8")
+    password = bytes(password, "utf-8")
+    chacha = ChaCha20Poly1305(key)
+    nonce = os.urandom(12)
+    ciphertext = chacha.encrypt(nonce, text, password)
     return "{}${}${}".format(
         base64.b64encode(salt).decode(),
         base64.b64encode(nonce).decode(),
@@ -98,7 +114,20 @@ def decrypt_aes_argon(cipher: str, password: str) -> str:
     return decrypted.decode()
 
 
+def decrypt_chacha_pbkdf(cipher: str, password: str) -> str:
+    """Decrypts message using AES argon encryption"""
+    salt, nonce, cipher_data = map(base64.b64decode, cipher.split("$"))
+    key, _ = deriveKey_pbkdf(password, salt)
+    password = bytes(password, "utf-8")
+    chacha = ChaCha20Poly1305(key)
+    decrypted = chacha.decrypt(nonce, cipher_data, password)
+    return decrypted.decode()
+
+
 if __name__ == "__main__":
-    cipher = encrypt_aes_pbkdf("duniya", "hello")
+    cipher = encrypt_chacha_pbkdf("duniya", "hello")
     print(cipher)
-    print(decrypt_aes_pbkdf(cipher, "hello"))
+    print(decrypt_chacha_pbkdf(cipher, "hello"))
+    # cipher = encrypt_aes_pbkdf("duniya", "hello")
+    # print(cipher)
+    # print(decrypt_aes_pbkdf(cipher, "hello"))
