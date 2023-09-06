@@ -70,13 +70,13 @@ tests = ["pytest"]
 
 [[package]]
 name = "asttokens"
-version = "2.3.0"
+version = "2.4.0"
 description = "Annotate AST trees with source code positions"
 optional = false
 python-versions = "*"
 files = [
-    {file = "asttokens-2.3.0-py2.py3-none-any.whl", hash = "sha256:bef1a51bc256d349e9f94e7e40e44b705ed1162f55294220dd561d24583d9877"},
-    {file = "asttokens-2.3.0.tar.gz", hash = "sha256:2552a88626aaa7f0f299f871479fc755bd4e7c11e89078965e928fb7bb9a6afe"},
+    {file = "asttokens-2.4.0-py2.py3-none-any.whl", hash = "sha256:cf8fc9e61a86461aa9fb161a14a0841a03c405fa829ac6b202670b3495d2ce69"},
+    {file = "asttokens-2.4.0.tar.gz", hash = "sha256:2e0171b991b2c959acc6c49318049236844a5da1d65ba2672c4880c1c894834e"},
 ]
 
 [package.dependencies]
@@ -364,6 +364,20 @@ files = [
 colorama = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
+name = "cloup"
+version = "3.0.1"
+description = "Adds features to Click: option groups, constraints, subcommand sections and help themes."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "cloup-3.0.1-py2.py3-none-any.whl", hash = "sha256:3e799ec235c722b6a48699ca30cff8ecc5083e21cdb4a5bc7456ae59beb54819"},
+    {file = "cloup-3.0.1.tar.gz", hash = "sha256:e08b4cc237bb9a5bd8ff81ba6ed49498e2200dac39227b1648e957882028e993"},
+]
+
+[package.dependencies]
+click = ">=8.0,<9.0"
+
+[[package]]
 name = "colorama"
 version = "0.4.6"
 description = "Cross-platform colored terminal text."
@@ -585,13 +599,13 @@ license = ["ukkonen"]
 
 [[package]]
 name = "ipykernel"
-version = "6.25.1"
+version = "6.25.2"
 description = "IPython Kernel for Jupyter"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "ipykernel-6.25.1-py3-none-any.whl", hash = "sha256:c8a2430b357073b37c76c21c52184db42f6b4b0e438e1eb7df3c4440d120497c"},
-    {file = "ipykernel-6.25.1.tar.gz", hash = "sha256:050391364c0977e768e354bdb60cbbfbee7cbb943b1af1618382021136ffd42f"},
+    {file = "ipykernel-6.25.2-py3-none-any.whl", hash = "sha256:2e2ee359baba19f10251b99415bb39de1e97d04e1fab385646f24f0596510b77"},
+    {file = "ipykernel-6.25.2.tar.gz", hash = "sha256:f468ddd1f17acb48c8ce67fcfa49ba6d46d4f9ac0438c1f441be7c3d1372230b"},
 ]
 
 [package.dependencies]
@@ -1578,4 +1592,4 @@ watchdog = ["watchdog (>=2.3)"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.12"
-content-hash = "81e0229e1264188f2e0bdbfeb96346b4bb6070ff212f4bcdf150f336709f9e9e"
+content-hash = "f65fecbac8345b967b9069b724ec840f79f712025f71b32cd140b073de787684"

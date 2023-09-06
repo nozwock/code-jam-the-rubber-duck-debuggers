@@ -73,7 +73,7 @@ class LsbSteganographyEncoder(EncoderInterface):
         data_bits = bitarray()
         data_bits.frombytes(data)
 
-        if len(data_bits) > len(channels) * 8:
+        if len(data_bits) > len(channels):  # Each channel can store 1 bit of the data
             raise Exception(
                 "Can't fit the data within the image with the current implementation."
             )

@@ -21,6 +21,7 @@ opencv-python = "^4.8.0.76"
 numpy = "^1.25.2"
 bitarray = "^2.8.1"
 flask = "^2.3.3"
+cloup = "^3.0.1"
 argon2-cffi = "^23.1.0"
 cryptography = "^41.0.3"
 
