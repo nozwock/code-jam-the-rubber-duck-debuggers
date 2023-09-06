@@ -5,7 +5,7 @@ from enum import Enum
 from typing import Protocol
 
 import argon2
-import cryptography.hazmat.primitives.ciphers as cryptography_ciphers
+import cryptography.hazmat.primitives.ciphers.aead as cryptography_ciphers
 
 
 class Cipher(Enum):
@@ -76,7 +76,7 @@ class PBAESGCM(PBCipher):
     def encrypt(self, data: bytes, secret: bytes, kdf: KDF = Argon2()) -> bytes:
         salt = kdf.salt
         key = kdf.hash(secret)
-        cipher = cryptography_ciphers.aead.AESGCM(key)
+        cipher = cryptography_ciphers.AESGCM(key)
         nonce = os.urandom(12)
 
         encrypted_data = cipher.encrypt(nonce, data, None)
@@ -94,7 +94,7 @@ class PBAESGCM(PBCipher):
 
         kdf.salt = salt
         key = kdf.hash(secret)
-        cipher = cryptography_ciphers.aead.AESGCM(key)
+        cipher = cryptography_ciphers.AESGCM(key)
 
         return cipher.decrypt(nonce, data, None)
 
@@ -125,7 +125,7 @@ def deriveKey_Argon(password: str, salt: bytes | None = None) -> tuple[bytes, by
 def encrypt_aes_pbkdf(text: str, password: str) -> str:
     """Encrypts message using AES cipher"""
     key, salt = deriveKey_pbkdf(password)
-    aes = cryptography_ciphers.aead.AESGCM(key)
+    aes = cryptography_ciphers.AESGCM(key)
     nonce = os.urandom(12)
     data = text.encode()
     ciphertext = aes.encrypt(nonce, data, None)
@@ -139,7 +139,7 @@ def encrypt_aes_pbkdf(text: str, password: str) -> str:
 def encrypt_aes_argon(text: str, password: str) -> bytes:
     """Encrypts message using AES cipher"""
     key, salt = deriveKey_Argon(password)
-    aes = cryptography_ciphers.aead.AESGCM(key)
+    aes = cryptography_ciphers.AESGCM(key)
     nonce = os.urandom(12)
     data = text.encode()
     ciphertext = aes.encrypt(nonce, data, None)
@@ -155,7 +155,7 @@ def encrypt_chacha_pbkdf(text: str, password: str) -> bytes:
     key, salt = deriveKey_pbkdf(password)
     text = bytes(text, "utf-8")
     password = bytes(password, "utf-8")
-    chacha = cryptography_ciphers.aead.ChaCha20Poly1305(key)
+    chacha = cryptography_ciphers.ChaCha20Poly1305(key)
     nonce = os.urandom(12)
     ciphertext = chacha.encrypt(nonce, text, password)
     return "{}${}${}".format(
@@ -170,7 +170,7 @@ def encrypt_chacha_argon(text: str, password: str) -> bytes:
     key, salt = deriveKey_Argon(password)
     text = bytes(text, "utf-8")
     password = bytes(password, "utf-8")
-    chacha = cryptography_ciphers.aead.ChaCha20Poly1305(key)
+    chacha = cryptography_ciphers.ChaCha20Poly1305(key)
     nonce = os.urandom(12)
     ciphertext = chacha.encrypt(nonce, text, password)
     return "{}${}${}".format(
@@ -184,7 +184,7 @@ def decrypt_aes_pbkdf(cipher: str, password: str) -> str:
     """Decrypts message using AES cipher"""
     salt, nonce, cipher_data = map(base64.b64decode, cipher.split("$"))
     key, _ = deriveKey_pbkdf(password, salt)
-    aes = cryptography_ciphers.aead.AESGCM(key)
+    aes = cryptography_ciphers.AESGCM(key)
     decrypted = aes.decrypt(nonce, cipher_data, None)
     return decrypted.decode()
 
@@ -193,7 +193,7 @@ def decrypt_aes_argon(cipher: str, password: str) -> str:
     """Decrypts message using AES argon encryption"""
     salt, nonce, cipher_data = map(base64.b64decode, cipher.split("$"))
     key, _ = deriveKey_Argon(password, salt)
-    aes = cryptography_ciphers.aead.AESGCM(key)
+    aes = cryptography_ciphers.AESGCM(key)
     decrypted = aes.decrypt(nonce, cipher_data, None)
     return decrypted.decode()
 
@@ -203,7 +203,7 @@ def decrypt_chacha_pbkdf(cipher: str, password: str) -> str:
     salt, nonce, cipher_data = map(base64.b64decode, cipher.split("$"))
     key, _ = deriveKey_pbkdf(password, salt)
     password = bytes(password, "utf-8")
-    chacha = cryptography_ciphers.aead.ChaCha20Poly1305(key)
+    chacha = cryptography_ciphers.ChaCha20Poly1305(key)
     decrypted = chacha.decrypt(nonce, cipher_data, password)
     return decrypted.decode()
 
@@ -213,7 +213,7 @@ def decrypt_chacha_argon(cipher: str, password: str) -> str:
     salt, nonce, cipher_data = map(base64.b64decode, cipher.split("$"))
     key, _ = deriveKey_Argon(password, salt)
     password = bytes(password, "utf-8")
-    chacha = cryptography_ciphers.aead.ChaCha20Poly1305(key)
+    chacha = cryptography_ciphers.ChaCha20Poly1305(key)
     decrypted = chacha.decrypt(nonce, cipher_data, password)
     return decrypted.decode()
 
