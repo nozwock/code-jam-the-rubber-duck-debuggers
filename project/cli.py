@@ -45,7 +45,7 @@ def decode():
     type=cloup.Path(dir_okay=False),
     default=None,
 )
-@cloup.option("-w", "--width-limit", type=int, default=0)
+@cloup.option("-w", "--width-limit", type=int, default=None)
 @cloup.option("-c", "--channels", type=int, default=3)
 @cloup.option_group(
     "Encryption",
@@ -75,7 +75,7 @@ def encode_direct(
     text: str | None,
     file: BinaryIO | None,
     output: Path | None,
-    width_limit: int,
+    width_limit: int | None,
     channels: int,
     encrypt: bool,
     key: str | None,
