@@ -6,7 +6,7 @@ from typing import BinaryIO
 
 import click
 import cloup
-from cloup.constraints import AnySet, If, mutually_exclusive, require_all
+from cloup.constraints import AnySet, If, require_all, require_one
 
 from .ciphers import KDF, Cipher
 from .encoders import DirectEncoder, LsbSteganographyEncoder
@@ -37,7 +37,7 @@ def decode():
     "Input",
     cloup.option("-t", "--text", type=str),
     cloup.option("-f", "--file", type=cloup.File("rb")),
-    constraint=mutually_exclusive,
+    constraint=require_one,
 )
 @cloup.option(
     "-o",
@@ -190,7 +190,7 @@ def decode_direct(
     "Input",
     cloup.option("-t", "--text", type=str),
     cloup.option("-f", "--file", type=cloup.File("rb")),
-    constraint=mutually_exclusive,
+    constraint=require_one,
 )
 @cloup.option(
     "-o",
