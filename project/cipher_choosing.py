@@ -122,18 +122,13 @@ class PBChaCha(PBCipher):
     def decrypt(self, data: bytes, secret: bytes, kdf: KDF = Argon2()) -> bytes:
         salt, nonce, data = map(base64.b64decode, data.split(self.SEP))
         assert len(nonce) == 12, "Corrupted encrypted data."
-
         kdf.salt = salt
         key = kdf.hash(secret)
         cipher = cryptography_ciphers.ChaCha20Poly1305(key)
-
         return cipher.decrypt(nonce, data, None)
 
 
 if __name__ == "__main__":
-    # cipher = encrypt_chacha_argon("duniya", "hello")
-    # print(cipher)
-    # print(decrypt_chacha_argon(cipher, "hello"))
     cipher = PBChaCha()
     encrypted = cipher.encrypt(b"hello world", b"1234")
     decrypted = cipher.decrypt(encrypted, b"1234")
