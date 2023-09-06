@@ -69,7 +69,6 @@ def encrypt_aes_pbkdf(text: str, password: str) -> str:
 def encrypt_aes_argon(text: str, password: str) -> bytes:
     """Encrypts message using AES cipher"""
     key, salt = deriveKey_Argon(password)
-    # salt = os.urandom(16)
     aes = AESGCM(key)
     nonce = os.urandom(12)
     data = text.encode()
@@ -84,6 +83,21 @@ def encrypt_aes_argon(text: str, password: str) -> bytes:
 def encrypt_chacha_pbkdf(text: str, password: str) -> bytes:
     """Encrypts message using chacha cipher"""
     key, salt = deriveKey_pbkdf(password)
+    text = bytes(text, "utf-8")
+    password = bytes(password, "utf-8")
+    chacha = ChaCha20Poly1305(key)
+    nonce = os.urandom(12)
+    ciphertext = chacha.encrypt(nonce, text, password)
+    return "{}${}${}".format(
+        base64.b64encode(salt).decode(),
+        base64.b64encode(nonce).decode(),
+        base64.b64encode(ciphertext).decode(),
+    )
+
+
+def encrypt_chacha_argon(text: str, password: str) -> bytes:
+    """Encrypts message using chacha cipher"""
+    key, salt = deriveKey_Argon(password)
     text = bytes(text, "utf-8")
     password = bytes(password, "utf-8")
     chacha = ChaCha20Poly1305(key)
@@ -124,10 +138,17 @@ def decrypt_chacha_pbkdf(cipher: str, password: str) -> str:
     return decrypted.decode()
 
 
+def decrypt_chacha_argon(cipher: str, password: str) -> str:
+    """Decrypts message using AES argon encryption"""
+    salt, nonce, cipher_data = map(base64.b64decode, cipher.split("$"))
+    key, _ = deriveKey_Argon(password, salt)
+    password = bytes(password, "utf-8")
+    chacha = ChaCha20Poly1305(key)
+    decrypted = chacha.decrypt(nonce, cipher_data, password)
+    return decrypted.decode()
+
+
 if __name__ == "__main__":
-    cipher = encrypt_chacha_pbkdf("duniya", "hello")
+    cipher = encrypt_chacha_argon("duniya", "hello")
     print(cipher)
-    print(decrypt_chacha_pbkdf(cipher, "hello"))
-    # cipher = encrypt_aes_pbkdf("duniya", "hello")
-    # print(cipher)
-    # print(decrypt_aes_pbkdf(cipher, "hello"))
+    print(decrypt_chacha_argon(cipher, "hello"))
