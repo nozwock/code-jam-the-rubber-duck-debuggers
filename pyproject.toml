@@ -21,6 +21,7 @@ opencv-python = "^4.8.0.76"
 numpy = "^1.25.2"
 bitarray = "^2.8.1"
 flask = "^2.3.3"
+click = "^8.1.7"
 
 [tool.poetry.group.dev.dependencies]
 # Base tools
