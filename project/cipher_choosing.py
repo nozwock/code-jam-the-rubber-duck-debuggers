@@ -8,19 +8,14 @@ import argon2
 import cryptography.hazmat.primitives.ciphers.aead as cryptography_ciphers
 
 
-class Cipher(Enum):
-    AESGCM = 1
-    ChaCha20 = 2
-
-
-class KDF(Protocol):
+class KDFInterface(Protocol):
     salt: bytes
 
     def hash(self, secret: bytes) -> bytes:
         ...
 
 
-class PBKDF2(KDF):
+class PBKDF2(KDFInterface):
     def __init__(self, salt: bytes | None = None, iterations: int = 500_000):
         self.salt = os.urandom(16) if salt is None else salt
         self.iterations = iterations
@@ -29,7 +24,7 @@ class PBKDF2(KDF):
         return hashlib.pbkdf2_hmac("sha256", secret, self.salt, self.iterations)
 
 
-class Argon2(KDF):
+class Argon2(KDFInterface):
     def __init__(
         self,
         salt: bytes | None = None,
@@ -58,22 +53,28 @@ class Argon2(KDF):
         )
 
 
-class PBCipher(Protocol):
+class PBCipherInterface(Protocol):
     """Common interface for a password-based cipher."""
 
-    def encrypt(self, data: bytes, secret: bytes, kdf: KDF = Argon2()) -> bytes:
+    def encrypt(
+        self, data: bytes, secret: bytes, kdf: KDFInterface = Argon2()
+    ) -> bytes:
         ...
 
-    def decrypt(self, data: bytes, secret: bytes, kdf: KDF = Argon2()) -> bytes:
+    def decrypt(
+        self, data: bytes, secret: bytes, kdf: KDFInterface = Argon2()
+    ) -> bytes:
         ...
 
 
-class PBAESGCM(PBCipher):
+class PBAESGCM(PBCipherInterface):
     """Password-based AESGCM."""
 
     SEP = b"$"
 
-    def encrypt(self, data: bytes, secret: bytes, kdf: KDF = Argon2()) -> bytes:
+    def encrypt(
+        self, data: bytes, secret: bytes, kdf: KDFInterface = Argon2()
+    ) -> bytes:
         salt = kdf.salt
         key = kdf.hash(secret)
         cipher = cryptography_ciphers.AESGCM(key)
@@ -88,7 +89,9 @@ class PBAESGCM(PBCipher):
             + base64.b64encode(encrypted_data)
         )
 
-    def decrypt(self, data: bytes, secret: bytes, kdf: KDF = Argon2()) -> bytes:
+    def decrypt(
+        self, data: bytes, secret: bytes, kdf: KDFInterface = Argon2()
+    ) -> bytes:
         salt, nonce, data = map(base64.b64decode, data.split(self.SEP))
         assert len(nonce) == 12, "Corrupted encrypted data."
 
@@ -99,12 +102,14 @@ class PBAESGCM(PBCipher):
         return cipher.decrypt(nonce, data, None)
 
 
-class PBChaCha(PBCipher):
-    """Password-based Chacha."""
+class PBChaCha20(PBCipherInterface):
+    """Password-based Chacha20."""
 
     SEP = b"$"
 
-    def encrypt(self, data: bytes, secret: bytes, kdf: KDF = Argon2()) -> bytes:
+    def encrypt(
+        self, data: bytes, secret: bytes, kdf: KDFInterface = Argon2()
+    ) -> bytes:
         salt = kdf.salt
         key = kdf.hash(secret)
         cipher = cryptography_ciphers.ChaCha20Poly1305(key)
@@ -119,17 +124,31 @@ class PBChaCha(PBCipher):
             + base64.b64encode(encrypted_data)
         )
 
-    def decrypt(self, data: bytes, secret: bytes, kdf: KDF = Argon2()) -> bytes:
+    def decrypt(
+        self, data: bytes, secret: bytes, kdf: KDFInterface = Argon2()
+    ) -> bytes:
         salt, nonce, data = map(base64.b64decode, data.split(self.SEP))
         assert len(nonce) == 12, "Corrupted encrypted data."
+
         kdf.salt = salt
         key = kdf.hash(secret)
         cipher = cryptography_ciphers.ChaCha20Poly1305(key)
+
         return cipher.decrypt(nonce, data, None)
 
 
+class Cipher(Enum):
+    AESGCM = PBAESGCM
+    ChaCha20 = PBChaCha20
+
+
+class KDF(Enum):
+    PBKDF2 = PBKDF2
+    Argon2 = Argon2
+
+
 if __name__ == "__main__":
-    cipher = PBChaCha()
+    cipher = PBChaCha20()
     encrypted = cipher.encrypt(b"hello world", b"1234")
     decrypted = cipher.decrypt(encrypted, b"1234")
     print(f"{decrypted, encrypted=}")
