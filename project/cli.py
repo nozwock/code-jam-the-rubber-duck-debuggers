@@ -2,18 +2,49 @@
 
 import sys
 from pathlib import Path
+from typing import BinaryIO
 
 import click
+import cloup
+from cloup.constraints import mutually_exclusive
 
 from .encoders import DirectEncoder, LsbSteganographyEncoder
 from .image import Image
 
+# from cloup.constraints import AnySet, If, require_all
 
-@click.group(
-    context_settings=dict(show_default=True, help_option_names=["-h", "--help"])
+
+@cloup.group(
+    context_settings=dict(help_option_names=["-h", "--help"], show_default=True)
 )
 def app():
     ...
+
+
+# TODO: Add encryption options
+# @app.command()
+# @cloup.option_group(
+#     "Encryption",
+#     cloup.option("--encrypt", is_flag=True),
+#     cloup.option(
+#         "--cipher",
+#         type=click.Choice(["chacha20", "aes-gcm"]),
+#         default=None,
+#         help="[default: aes-gcm]",
+#     ),
+#     cloup.option(
+#         "--kdf",
+#         type=click.Choice(["argon2", "pbkdf"]),
+#         default=None,
+#         help="[default: argon2]",
+#     ),
+# )
+# @cloup.constraint(
+#     If(AnySet("kdf", "cipher"), then=require_all),
+#     ["encrypt"],
+# )
+# def test(**kwargs):
+#     ...
 
 
 @app.group()
@@ -29,27 +60,40 @@ def decode():
 
 
 @encode.command("direct")
-@click.argument("text", type=str)
-@click.option(
+@cloup.option_group(
+    "Input",
+    cloup.option("-t", "--text", type=str),
+    cloup.option("-f", "--file", type=cloup.File("rb")),
+    constraint=mutually_exclusive,
+)
+@cloup.option(
+    "-o",
     "--output",
-    type=click.Path(dir_okay=False),
+    type=cloup.Path(dir_okay=False),
     default=None,
 )
-@click.option("--width-limit", type=int, default=0)
-@click.option("--channels", type=int, default=3)
-@click.option("--encoding", type=str, default="utf-8")
+@cloup.option("-w", "--width-limit", type=int, default=0)
+@cloup.option("-c", "--channels", type=int, default=3)
 def encode_direct(
-    text: str,
+    text: str | None,
+    file: BinaryIO | None,
     output: Path | None,
     width_limit: int,
     channels: int,
-    encoding: str,
 ):
     """Encodes data into an image by utilizing the pixel channels to store each byte of the data."""
+    if text is not None:
+        data = text.encode()
+    else:
+        assert file is not None
+        try:
+            data = file.read()
+        except Exception as e:
+            file.close()
+            raise e
+
     image = Image.encode(
-        DirectEncoder(
-            data=bytes(text, encoding), width_limit=width_limit, channels=channels
-        )
+        DirectEncoder(data=data, width_limit=width_limit, channels=channels)
     )
 
     save_to = Path("output.png") if output is None else output
@@ -60,31 +104,58 @@ def encode_direct(
 
 
 @decode.command("direct")
-@click.argument("img", type=click.Path(exists=True, dir_okay=False))
-@click.option("--encoding", type=str, default="utf-8")
-def decode_direct(img: Path, encoding: str):
+@cloup.argument("img", type=cloup.Path(exists=True, dir_okay=False))
+@cloup.option(
+    "-o",
+    "--output",
+    type=cloup.File("wb"),
+    default=None,
+)
+def decode_direct(img: Path, output: BinaryIO | None):
     """Decodes data from an image."""
-    text = Image.read(img).decode(DirectEncoder()).decode(encoding=encoding)
+    data = Image.read(img).decode(DirectEncoder())
 
-    click.echo("Decoded text:", sys.stderr)
-    click.echo(text)
+    if output is None:
+        click.echo("Decoded data:", sys.stderr)
+        sys.stdout.buffer.write(data)
+    else:
+        try:
+            output.write(data)
+        except Exception as e:
+            output.close()
+            raise e
 
 
 @encode.command("steganography")
-@click.argument("text", type=str)
-@click.argument("img", type=click.Path(exists=True, dir_okay=False))
-@click.option(
+@cloup.argument("img", type=cloup.Path(exists=True, dir_okay=False))
+@cloup.option_group(
+    "Input",
+    cloup.option("-t", "--text", type=str),
+    cloup.option("-f", "--file", type=cloup.File("rb")),
+    constraint=mutually_exclusive,
+)
+@cloup.option(
+    "-o",
     "--output",
-    type=click.Path(dir_okay=False),
+    type=cloup.Path(dir_okay=False),
     default=None,
 )
-@click.option("--encoding", type=str, default="utf-8")
-def encode_steganography(text: str, img: Path, output: Path | None, encoding: str):
+def encode_steganography(
+    text: str | None, file: BinaryIO | None, img: Path, output: Path | None
+):
     """Encodes data into an image utilizing Steganography."""
+    if text is not None:
+        data = text.encode()
+    else:
+        assert file is not None
+        try:
+            data = file.read()
+        except Exception as e:
+            file.close()
+            raise e
+
     image = Image.encode(
-        LsbSteganographyEncoder(
-            data=bytes(text, encoding), img=Image.read(img).as_array()
-        )
+        LsbSteganographyEncoder(data=data, img=Image.read(img).as_array())
     )
 
     save_to = Path("output.png") if output is None else output
@@ -95,15 +166,23 @@ def encode_steganography(text: str, img: Path, output: Path | None, encoding: st
 
 
 @decode.command("steganography")
-@click.argument("img", type=click.Path(exists=True, dir_okay=False))
-@click.option("--encoding", type=str, default="utf-8")
-def decode_steganography(img: Path, encoding: str):
+@cloup.argument("img", type=cloup.Path(exists=True, dir_okay=False))
+@cloup.option(
+    "-o",
+    "--output",
+    type=cloup.File("wb"),
+    default=None,
+)
+def decode_steganography(img: Path, output: BinaryIO | None):
     """Decodes data from an image utilizing Steganography."""
-    text = Image.read(img).decode(LsbSteganographyEncoder()).decode(encoding=encoding)
+    data = Image.read(img).decode(LsbSteganographyEncoder())
 
-    click.echo("Decoded text:", sys.stderr)
-    click.echo(text)
-
-
-if __name__ == "__main__":
-    app()
+    if output is None:
+        click.echo("Decoded data:", sys.stderr)
+        sys.stdout.buffer.write(data)
+    else:
+        try:
+            output.write(data)
+        except Exception as e:
+            output.close()
+            raise e
