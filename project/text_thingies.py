@@ -7,14 +7,21 @@ import numpy as np
 def get_text_boxes(img: np.ndarray) -> list[tuple[int, 4]]:
     """Converts a given image into its text boxes"""
     img_rgb = cv.cvtColor(img, cv.COLOR_BGR2RGB)
-img_cpy = img.copy()
-height, width, channels = img.shape
-
-d = pytesseract.image_to_data(img_rgb, output_type=Output.DICT)
-n_boxes = len(d["text"])
-for i in range(n_boxes):
-    if int(d["conf"][i]) < 60:
-        continue
+    d = pytesseract.image_to_data(img_rgb, output_type=Output.DICT)
+    n_boxes = len(d["text"])
+    array_of_boxes = []
+    for i in range(n_boxes):
+        if int(d["conf"][i]) < 60:
+            continue
+        array_of_boxes.append(
+            (
+                d["top"][i],
+                d["top"][i] + d["height"][i],  # y, y + h
+                d["left"][i],
+                d["left"][i] + d["width"][i],  # x, x + w
+            )
+        )
+    return array_of_boxes
 
     (x, y, w, h) = (d["left"][i], d["top"][i], d["width"][i], d["height"][i])
     mask = np.zeros(img.shape[:2], np.uint8)
