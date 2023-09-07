@@ -5,8 +5,10 @@ import numpy as np
 from pathlib import Path
 import os
 
-img = cv.imread("./project/test.png", cv.IMREAD_UNCHANGED)
-img_rgb = cv.cvtColor(img, cv.COLOR_BGR2RGB)
+
+def get_text_boxes(img: np.ndarray) -> list[tuple[int, 4]]:
+    """Converts a given image into its text boxes"""
+    img_rgb = cv.cvtColor(img, cv.COLOR_BGR2RGB)
 img_cpy = img.copy()
 height, width, channels = img.shape
 
