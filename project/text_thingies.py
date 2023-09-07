@@ -39,6 +39,19 @@ def inpaint_img(img: np.ndarray, boxes: list[tuple[int, 4]]) -> np.ndarray:
     return img
 
 
+def add_text(img: np.ndarray, box: tuple[int, 4], text: str, color: np.ndarray):
+    return cv.putText(
+        img,
+        text,
+        (box[2], box[1]),
+        cv.FONT_HERSHEY_SIMPLEX,
+        1,
+        tuple(color),
+        1,
+        cv.LINE_AA,
+    )
+
+
 if __name__ == "__main__":
     img = cv.imread("./project/test.png", cv.IMREAD_UNCHANGED)
     boxes = get_text_boxes(img)
