@@ -24,6 +24,11 @@ def get_text_boxes(img: np.ndarray) -> list[tuple[int, 4]]:
     return array_of_boxes
 
 
+def get_text_color(img: np.ndarray, box: tuple[int, 4]) -> np.ndarray:
+    (y1, y2, x1, x2) = box
+    return np.array(cv.mean(img[y1:y2, x1:x2]))
+
+
 def inpaint_img(img: np.ndarray, boxes: list[tuple[int, 4]]) -> np.ndarray:
     """Inpaints the boxes of the given image"""
     for box in boxes:
