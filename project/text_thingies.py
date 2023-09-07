@@ -33,8 +33,10 @@ def inpaint_img(img: np.ndarray, boxes: list[tuple[int, 4]]) -> np.ndarray:
         img = cv.inpaint(img, mask, 3, cv.INPAINT_NS)
     return img
 
-cv.waitKey(0)
-cv.imshow("", img)
-cv.waitKey(0)
-cv.imshow("output", img)
-cv.waitKey(0)
+
+if __name__ == "__main__":
+    img = cv.imread("./project/test.png", cv.IMREAD_UNCHANGED)
+    boxes = get_text_boxes(img)
+    inpainted_img = inpaint_img(img, boxes)
+    cv.imshow("", inpainted_img)
+    cv.waitKey(0)
