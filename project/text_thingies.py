@@ -1,58 +1,28 @@
-from imutils.object_detection import non_max_suppression
+import pytesseract
 import cv2 as cv
 import numpy as np
+from pathlib import Path
+import os
 
-net = cv.dnn.readNet("./frozen_east_text_detection.pb")
+img = cv.imread("./project/test.png", cv.IMREAD_UNCHANGED)
+img_rgb = cv.cvtColor(img, cv.COLOR_BGR2RGB)
+img_cpy = img.copy()
+height, width, channels = img.shape
 
+boxes = pytesseract.image_to_boxes(img_rgb).splitlines()
+for box in boxes:
+    x1, y1, x2, y2 = map(int, box.split(" ")[1:-1])
+    img_cpy = cv.rectangle(img, (x1, height - y1), (x2, height - y2), (0, 255, 0), 2)
+    mask = np.zeros(img.shape[:2], np.uint8)
+    mask[y1:y2, x1:x2] = 255
+    masked_img = cv.bitwise_and(img, img, mask=mask)
+    cv.imshow("", masked_img)
+    cv.waitKey(0)
+    img = cv.inpaint(img, mask, 3, cv.INPAINT_NS)
 
-def find_text(img: np.ndarray):
-    original_image = img.copy()
-    (H, W) = img.shape[:2]
-    (newW, newH) = (320, 320)
-    rW = W / float(newW)
-    rH = H / float(newH)
-    layerNames = ["feature_fusion/Conv_7/Sigmoid", "feature_fusion/concat_3"]
-    blob = cv.dnn.blobFromImage(
-        img, 1.0, (W, H), (123.68, 116.78, 103.94), swapRB=True, crop=False
-    )
-    net.setInput(blob)
-    (scores, geometry) = net.forward(layerNames)
-    (rows, cols) = scores.shape[2:4]
-    rects = []
-    confidences = []
-    for y in range(rows):
-        scoresData = scores[0, 0, y]
-        xData0 = geometry[0, 0, y]
-        xData1 = geometry[0, 1, y]
-        xData2 = geometry[0, 2, y]
-        xData3 = geometry[0, 3, y]
-        anglesData = geometry[0, 4, y]
-    for x in range(cols):
-        if scoresData[x] < 0.5:
-            continue
-        (offsetX, offsetY) = (x * 4.0, y * 4.0)
-        angle = anglesData[x]
-        cos = np.cos(angle)
-        sin = np.sin(angle)
-        h = xData0[x] + xData2[x]
-        w = xData1[x] + xData3[x]
-        endX = int(offsetX + (cos * xData1[x]) + (sin * xData2[x]))
-        endY = int(offsetY - (sin * xData1[x]) + (cos * xData2[x]))
-        startX = int(endX - w)
-        startY = int(endY - h)
-        rects.append((startX, startY, endX, endY))
-        confidences.append(scoresData[x])
-    boxes = non_max_suppression(np.array(rects), probs=confidences)
-    for startX, startY, endX, endY in boxes:
-        startX = int(startX * rW)
-        startY = int(startY * rH)
-        endX = int(endX * rW)
-        endY = int(endY * rH)
-        cv.rectangle(original_image, (startX, startY), (endX, endY), (0, 255, 0), 2)
-    cv.imshow("Text Detection", original_image)
-    cv.waitkey(0)
-
-
-if __name__ == "__main__":
-    img = cv.imread("./project/wallmart.jpg", cv.IMREAD_UNCHANGED)
-    find_text(img)
+cv.imshow("", img_cpy)
+cv.waitKey(0)
+cv.imshow("", img)
+cv.waitKey(0)
+cv.imshow("output", img)
+cv.waitKey(0)
