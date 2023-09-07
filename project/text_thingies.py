@@ -2,8 +2,6 @@ import pytesseract
 from pytesseract import Output
 import cv2 as cv
 import numpy as np
-from pathlib import Path
-import os
 
 
 def get_text_boxes(img: np.ndarray) -> list[tuple[int, 4]]:
