@@ -23,13 +23,15 @@ def get_text_boxes(img: np.ndarray) -> list[tuple[int, 4]]:
         )
     return array_of_boxes
 
-    (x, y, w, h) = (d["left"][i], d["top"][i], d["width"][i], d["height"][i])
-    mask = np.zeros(img.shape[:2], np.uint8)
-    mask[y : y + h, x : x + w] = 255
-    masked_img = cv.bitwise_and(img, img, mask=mask)
-    cv.imshow("", mask)
-    cv.waitKey(0)
-    img = cv.inpaint(img, mask, 3, cv.INPAINT_NS)
+
+def inpaint_img(img: np.ndarray, boxes: list[tuple[int, 4]]) -> np.ndarray:
+    """Inpaints the boxes of the given image"""
+    for box in boxes:
+        (y1, y2, x1, x2) = box
+        mask = np.zeros(img.shape[:2], np.uint8)
+        mask[y1:y2, x1:x2] = 255
+        img = cv.inpaint(img, mask, 3, cv.INPAINT_NS)
+    return img
 
 cv.waitKey(0)
 cv.imshow("", img)
