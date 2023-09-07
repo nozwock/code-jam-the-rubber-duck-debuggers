@@ -6,12 +6,11 @@ from typing import BinaryIO
 
 import click
 import cloup
-from cloup.constraints import mutually_exclusive
+from cloup.constraints import AnySet, If, require_all, require_one
 
+from .ciphers import KDF, Cipher
 from .encoders import DirectEncoder, LsbSteganographyEncoder
 from .image import Image
-
-# from cloup.constraints import AnySet, If, require_all
 
 
 @cloup.group(
@@ -19,32 +18,6 @@ from .image import Image
 )
 def app():
     ...
-
-
-# TODO: Add encryption options
-# @app.command()
-# @cloup.option_group(
-#     "Encryption",
-#     cloup.option("--encrypt", is_flag=True),
-#     cloup.option(
-#         "--cipher",
-#         type=click.Choice(["chacha20", "aes-gcm"]),
-#         default=None,
-#         help="[default: aes-gcm]",
-#     ),
-#     cloup.option(
-#         "--kdf",
-#         type=click.Choice(["argon2", "pbkdf"]),
-#         default=None,
-#         help="[default: argon2]",
-#     ),
-# )
-# @cloup.constraint(
-#     If(AnySet("kdf", "cipher"), then=require_all),
-#     ["encrypt"],
-# )
-# def test(**kwargs):
-#     ...
 
 
 @app.group()
@@ -64,7 +37,7 @@ def decode():
     "Input",
     cloup.option("-t", "--text", type=str),
     cloup.option("-f", "--file", type=cloup.File("rb")),
-    constraint=mutually_exclusive,
+    constraint=require_one,
 )
 @cloup.option(
     "-o",
@@ -72,14 +45,42 @@ def decode():
     type=cloup.Path(dir_okay=False),
     default=None,
 )
-@cloup.option("-w", "--width-limit", type=int, default=0)
+@cloup.option("-w", "--width-limit", type=int, default=None)
 @cloup.option("-c", "--channels", type=int, default=3)
+@cloup.option_group(
+    "Encryption",
+    cloup.option("-e", "--encrypt", is_flag=True),
+    cloup.option("-k", "--key", type=str, default=None),
+    cloup.option(
+        "--cipher",
+        type=click.Choice(Cipher._member_names_, case_sensitive=False),
+        default=None,
+        callback=lambda ctx, param, v: Cipher._member_map_[v] if v else None,
+    ),
+    cloup.option(
+        "--kdf",
+        type=click.Choice(KDF._member_names_, case_sensitive=False),
+        default=None,
+        callback=lambda ctx, param, v: KDF._member_map_[v] if v else None,
+    ),
+)
+@cloup.constraint(
+    If(
+        AnySet("key", "cipher", "kdf"),
+        then=require_all,
+    ),
+    ["encrypt"],
+)
 def encode_direct(
     text: str | None,
     file: BinaryIO | None,
     output: Path | None,
-    width_limit: int,
+    width_limit: int | None,
     channels: int,
+    encrypt: bool,
+    key: str | None,
+    cipher: Cipher | None,
+    kdf: KDF | None,
 ):
     """Encodes data into an image by utilizing the pixel channels to store each byte of the data."""
     if text is not None:
@@ -91,6 +92,17 @@ def encode_direct(
         except Exception as e:
             file.close()
             raise e
+
+    if encrypt:
+        cipher = Cipher.ChaCha20 if cipher is None else cipher
+        kdf = KDF.Argon2 if kdf is None else kdf
+        key = (
+            click.prompt("Password Key", hide_input=True, confirmation_prompt=True)
+            if key is None and encrypt
+            else key
+        )
+
+        data = cipher.value().encrypt(data, secret=key.encode(), kdf=kdf.value())
 
     image = Image.encode(
         DirectEncoder(data=data, width_limit=width_limit, channels=channels)
@@ -111,9 +123,55 @@ def encode_direct(
     type=cloup.File("wb"),
     default=None,
 )
-def decode_direct(img: Path, output: BinaryIO | None):
+@cloup.option_group(
+    "Encryption",
+    cloup.option("-d", "--decrypt", is_flag=True),
+    cloup.option("-k", "--key", type=str, default=None),
+    cloup.option(
+        "--cipher",
+        type=click.Choice(Cipher._member_names_, case_sensitive=False),
+        default=None,
+        callback=lambda ctx, param, v: Cipher._member_map_[v] if v else None,
+    ),
+    cloup.option(
+        "--kdf",
+        type=click.Choice(KDF._member_names_, case_sensitive=False),
+        default=None,
+        callback=lambda ctx, param, v: KDF._member_map_[v] if v else None,
+    ),
+)
+@cloup.constraint(
+    If(
+        AnySet("key", "cipher", "kdf"),
+        then=require_all,
+    ),
+    ["decrypt"],
+)
+def decode_direct(
+    img: Path,
+    output: BinaryIO | None,
+    decrypt: bool,
+    key: str | None,
+    cipher: Cipher | None,
+    kdf: KDF | None,
+):
     """Decodes data from an image."""
     data = Image.read(img).decode(DirectEncoder())
+
+    if decrypt:
+        cipher = Cipher.ChaCha20 if cipher is None else cipher
+        kdf = KDF.Argon2 if kdf is None else kdf
+        key = (
+            click.prompt("Password Key", hide_input=True)
+            if key is None and decrypt
+            else key
+        )
+
+        try:
+            data = cipher.value().decrypt(data, secret=key.encode(), kdf=kdf.value())
+        except Exception as e:
+            click.echo(f"Error: {repr(e)}", sys.stderr)
+            sys.exit(1)
 
     if output is None:
         click.echo("Decoded data:", sys.stderr)
@@ -132,7 +190,7 @@ def decode_direct(img: Path, output: BinaryIO | None):
     "Input",
     cloup.option("-t", "--text", type=str),
     cloup.option("-f", "--file", type=cloup.File("rb")),
-    constraint=mutually_exclusive,
+    constraint=require_one,
 )
 @cloup.option(
     "-o",
@@ -140,8 +198,39 @@ def decode_direct(img: Path, output: BinaryIO | None):
     type=cloup.Path(dir_okay=False),
     default=None,
 )
+@cloup.option_group(
+    "Encryption",
+    cloup.option("-e", "--encrypt", is_flag=True),
+    cloup.option("-k", "--key", type=str, default=None),
+    cloup.option(
+        "--cipher",
+        type=click.Choice(Cipher._member_names_, case_sensitive=False),
+        default=None,
+        callback=lambda ctx, param, v: Cipher._member_map_[v] if v else None,
+    ),
+    cloup.option(
+        "--kdf",
+        type=click.Choice(KDF._member_names_, case_sensitive=False),
+        default=None,
+        callback=lambda ctx, param, v: KDF._member_map_[v] if v else None,
+    ),
+)
+@cloup.constraint(
+    If(
+        AnySet("key", "cipher", "kdf"),
+        then=require_all,
+    ),
+    ["encrypt"],
+)
 def encode_steganography(
-    text: str | None, file: BinaryIO | None, img: Path, output: Path | None
+    text: str | None,
+    file: BinaryIO | None,
+    img: Path,
+    output: Path | None,
+    encrypt: bool,
+    key: str | None,
+    cipher: Cipher | None,
+    kdf: KDF | None,
 ):
     """Encodes data into an image utilizing Steganography."""
     if text is not None:
@@ -153,6 +242,17 @@ def encode_steganography(
         except Exception as e:
             file.close()
             raise e
+
+    if encrypt:
+        cipher = Cipher.ChaCha20 if cipher is None else cipher
+        kdf = KDF.Argon2 if kdf is None else kdf
+        key = (
+            click.prompt("Password Key", hide_input=True, confirmation_prompt=True)
+            if key is None and encrypt
+            else key
+        )
+
+        data = cipher.value().encrypt(data, secret=key.encode(), kdf=kdf.value())
 
     image = Image.encode(
         LsbSteganographyEncoder(data=data, img=Image.read(img).as_array())
@@ -173,9 +273,55 @@ def encode_steganography(
     type=cloup.File("wb"),
     default=None,
 )
-def decode_steganography(img: Path, output: BinaryIO | None):
+@cloup.option_group(
+    "Encryption",
+    cloup.option("-d", "--decrypt", is_flag=True),
+    cloup.option("-k", "--key", type=str, default=None),
+    cloup.option(
+        "--cipher",
+        type=click.Choice(Cipher._member_names_, case_sensitive=False),
+        default=None,
+        callback=lambda ctx, param, v: Cipher._member_map_[v] if v else None,
+    ),
+    cloup.option(
+        "--kdf",
+        type=click.Choice(KDF._member_names_, case_sensitive=False),
+        default=None,
+        callback=lambda ctx, param, v: KDF._member_map_[v] if v else None,
+    ),
+)
+@cloup.constraint(
+    If(
+        AnySet("key", "cipher", "kdf"),
+        then=require_all,
+    ),
+    ["decrypt"],
+)
+def decode_steganography(
+    img: Path,
+    output: BinaryIO | None,
+    decrypt: bool,
+    key: str | None,
+    cipher: Cipher | None,
+    kdf: KDF | None,
+):
     """Decodes data from an image utilizing Steganography."""
     data = Image.read(img).decode(LsbSteganographyEncoder())
+
+    if decrypt:
+        cipher = Cipher.ChaCha20 if cipher is None else cipher
+        kdf = KDF.Argon2 if kdf is None else kdf
+        key = (
+            click.prompt("Password Key", hide_input=True)
+            if key is None and decrypt
+            else key
+        )
+
+        try:
+            data = cipher.value().decrypt(data, secret=key.encode(), kdf=kdf.value())
+        except Exception as e:
+            click.echo(f"Error: {repr(e)}", sys.stderr)
+            sys.exit(1)
 
     if output is None:
         click.echo("Decoded data:", sys.stderr)

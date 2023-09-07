@@ -7,13 +7,17 @@ from project.image import EncoderInterface, Image
 
 
 class DirectEncoder(EncoderInterface):
-    """An Encoder which utilizes the pixel channels to store each byte of the data."""
+    """
+    An Encoder which utilizes the pixel channels to store each byte of the data.
+
+    - When `width_limit` is set to `None`, it will generate an image with dimensions as close as possible to a square.
+    """
 
     def __init__(
         self,
         data: bytes | None = None,
         *,
-        width_limit: int = 0,
+        width_limit: int | None = None,
         channels: int = 3,
     ):
         self.data = data
@@ -30,6 +34,8 @@ class DirectEncoder(EncoderInterface):
         height = (
             math.ceil(abs(len(self.data) / (self.width_limit * self.channels)))
             if self.width_limit
+            else math.ceil(abs(math.sqrt(len(self.data) / self.channels)))
+            if self.width_limit is None
             else 1
         )
         width = math.ceil(abs(len(self.data) / (height * self.channels)))
