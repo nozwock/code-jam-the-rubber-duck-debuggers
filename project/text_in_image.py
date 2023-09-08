@@ -3,8 +3,10 @@ import cv2
 import random
 
 
-def create_blank_image(width: int, height: int, colour_bgr):
+def create_blank_image(width: int, height: int, colour_bgr: tuple | None):
     """Creates a blank image on bgr space"""
+    if colour_bgr is None:
+        colour_bgr = (255, 255, 255)
     b, g, r = colour_bgr
     image = np.zeros((height, width, 3), np.uint8)
     image[:, :, 0] = b
@@ -13,14 +15,14 @@ def create_blank_image(width: int, height: int, colour_bgr):
     return image
 
 
-def add_text(image, word_filler, word_secret):
+def add_text(image: np.uint8, word_filler: str, word_secret: str):
     """Add some text to the image"""
     height, width, _ = image.shape
-    font = cv2.FONT_HERSHEY_SIMPLEX
+    font = cv2.FONT_HERSHEY_PLAIN
     x, y = 0, 0
-    fontScale = 1
+    fontScale = 0.5
     color = (0, 0, 0)  # BGR Format
-    thickness = 2  # Line Thickness
+    thickness = 1  # Line Thickness
     (text_width, text_height), baseline = cv2.getTextSize(word_filler, font, fontScale, thickness)
     (text_width_secret, text_height_secret), baseline_secret = cv2.getTextSize(word_secret, font, fontScale, thickness)
 
@@ -38,8 +40,8 @@ def add_text(image, word_filler, word_secret):
         x = 0
         while x < width:
             origin = (x, y)
-            if x + text_width > width:
-                break
+            # if x + text_width > width:
+            #     break
             if (count_y*(width//text_width))+count_x != secret_num:
                 image = cv2.putText(image, word_filler, origin, font,
                                     fontScale, color, thickness, cv2.LINE_AA)
@@ -59,7 +61,7 @@ def add_text(image, word_filler, word_secret):
 
 
 if __name__ == "__main__":
-    image = create_blank_image(720, 480, colour_bgr=(255, 255, 255))
-    image = add_text(image, "Hello", "World")
+    image = create_blank_image(720, 480, None)
+    image = add_text(image, "uncool", "cool")
     cv2.imshow("A New Image", image)
     cv2.waitKey(0)
