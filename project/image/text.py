@@ -2,8 +2,6 @@ import math
 
 import cv2
 import numpy as np
-import pytesseract
-from pytesseract import Output
 
 from project.defines import EAST_TEXT_DETECTION_MODEL_PATH
 
@@ -91,41 +89,17 @@ def east_text_bbox(
     return np.array(bboxes, dtype=np.int32)
 
 
-def get_text_boxes(img: np.ndarray) -> list[tuple[int, 4]]:
-    """Converts a given image into its text boxes"""
-    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    d = pytesseract.image_to_data(img_rgb, output_type=Output.DICT)
-    n_boxes = len(d["text"])
-    array_of_boxes = []
-    for i in range(n_boxes):
-        if int(d["conf"][i]) < 60:
-            continue
-        array_of_boxes.append(
-            (
-                d["top"][i],
-                d["top"][i] + d["height"][i],  # y, y + h
-                d["left"][i],
-                d["left"][i] + d["width"][i],  # x, x + w
-            )
-        )
-    return array_of_boxes
-
-
-def get_text_color(img: np.ndarray, box: tuple[int, 4]) -> np.ndarray:
-    (y1, y2, x1, x2) = box
-    return np.array(cv2.mean(img[y1:y2, x1:x2]))
-
-
-def inpaint_img(img: np.ndarray, boxes: list[tuple[int, 4]]) -> np.ndarray:
-    """Inpaints the boxes of the given image"""
-    for box in boxes:
-        (y1, y2, x1, x2) = box
+def inpaint_bbox(img: np.ndarray, bboxes: np.ndarray) -> np.ndarray:
+    """Inpaints the bboxes for an image."""
+    for pts in bboxes:
         mask = np.zeros(img.shape[:2], np.uint8)
-        mask[y1:y2, x1:x2] = 255
+        cv2.fillPoly(mask, [pts], 255)
         img = cv2.inpaint(img, mask, 3, cv2.INPAINT_NS)
     return img
 
 
+# TODO: Need to put text according to the bbox
+# bbox could be rotated
 def add_text(img: np.ndarray, box: tuple[int, 4], text: str, color: np.ndarray):
     return cv2.putText(
         img,
@@ -137,6 +111,17 @@ def add_text(img: np.ndarray, box: tuple[int, 4], text: str, color: np.ndarray):
         1,
         cv2.LINE_AA,
     )
+
+
+def get_contour_color(img: np.ndarray) -> tuple[float, ...]:
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    ret, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
+
+    contours, heirarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+
+    mask = np.zeros(img.shape[:2], np.uint8)
+    cv2.drawContours(mask, contours, -1, 255, -1)
+    return cv2.mean(img, mask)
 
 
 if __name__ == "__main__":
@@ -151,10 +136,18 @@ if __name__ == "__main__":
     # cv2.imshow("", inpainted_img)
     # cv2.waitKey(0)
 
-    # img = cv2.imread("test.png")
-    # bboxes = east_text_bbox(img, pp_width=480)
-    # for pts in bboxes:
-    #     cv2.polylines(img, [pts], True, (0, 255, 0), 2)
+    img = cv2.imread("test.png")
+    bboxes = east_text_bbox(img, pp_width=480)
+    cv2.imwrite("output.png", inpaint_bbox(img, bboxes))
+    for pts in bboxes:
+        # x, y, w, h = cv2.boundingRect(pts)
+        # cropped = img[y : y + h, x : x + w].copy()
+        # print(get_contour_color(cropped))
+
+        cv2.polylines(img, [pts], True, (0, 255, 0), 2)
+
+        ...
+
     # cv2.imwrite("output.png", img)
 
     ...
