@@ -177,7 +177,6 @@ def hide_with_repeatation(
 
     max_texts = ((img_height // (text_height + padding_y))) * ((img_width // (repeat_width + padding_x)))
     secret_pos = random.randint(0, max_texts)
-    secret_pos = max_texts
     put_secret = True
     for i, y in enumerate(range(0, img_height, text_height + padding_y)):
         j = x = 0
@@ -226,10 +225,10 @@ if __name__ == "__main__":
     ...
 
     # cv2.imwrite("output.png", img)
-    # img = np.zeros([480, 720, 3], dtype=np.uint8)
-    # img.fill(255)  # or img[:] = 255
-    # new = hide_with_repeatation(img, "Hello", "World", color=(0, 0, 0), font_size=10, padding_y=10,
-    #                             padding_x=15, trim_extra=True)
-    # cv2.imshow("Sup", new)
-    # cv2.waitKey(0)
+    img = np.zeros([480, 720, 3], dtype=np.uint8)
+    img.fill(255)  # or img[:] = 255
+    new = hide_with_repeatation(img, "Hello", "World", color=(0, 0, 0), font_size=10, padding_y=10,
+                                padding_x=7, trim_extra=True)
+    cv2.imshow("Sup", new)
+    cv2.waitKey(0)
     ...
