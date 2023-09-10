@@ -2,15 +2,22 @@
 
 import sys
 from pathlib import Path
-from typing import BinaryIO
+from typing import BinaryIO, cast
 
 import click
 import cloup
+import cv2
+import numpy as np
 from cloup.constraints import AnySet, If, require_all, require_one
+from PIL import ImageColor
 
 from .ciphers import KDF, Cipher
 from .encoders import DirectEncoder, LsbSteganographyEncoder
 from .image import Image
+from .image.text import (
+    create_colored_image, east_text_bbox, get_contour_color, hide_with_repeatation,
+    inpaint_bbox, put_text_in_bbox,
+)
 
 
 @cloup.group(
@@ -18,6 +25,134 @@ from .image import Image
 )
 def app():
     ...
+
+
+@app.command("hide-text")
+@cloup.argument("secret", type=str)
+@cloup.argument("repeat", type=str)
+@cloup.option_group(
+    "Image",
+    cloup.option("-w", "--width", type=int, default=720),
+    cloup.option("-h", "--height", type=int, default=480),
+    cloup.option("--img-color", type=str, default="#000000"),
+)
+@cloup.option("-c", "--color", type=str, default="#ffffff")
+@cloup.option("--font-size", type=int, default=10)
+@cloup.option("-p", "--padding", type=str, default="0, 2")
+@cloup.option("--trim-extra", type=bool, default=True)
+@cloup.option(
+    "-o",
+    "--output",
+    type=cloup.Path(dir_okay=False),
+    default=None,
+)
+def hide_text(
+    secret: str,
+    repeat: str,
+    width: int,
+    height: int,
+    img_color: str,
+    color: str,
+    font_size: int,
+    padding: str,
+    trim_extra: bool,
+    output: Path | None,
+):
+    """Generates an image with a hidden secret string by putting it in between repeations of some string."""
+    rgb_color = ImageColor.getrgb(color)
+    rgb_img_color = ImageColor.getrgb(img_color)
+
+    save_to = Path("output.png") if output is None else output
+    Image(
+        hide_with_repeatation(
+            create_colored_image(width, height, rgb_img_color),
+            secret,
+            repeat,
+            color=rgb_color,
+            font_size=font_size,
+            padding=cast(tuple[int, int], tuple(map(int, padding.split(",")[:2]))),
+            trim_extra=trim_extra,
+        )
+    ).save(save_to)
+
+    click.echo("Image saved to: ", sys.stderr, nl=False)
+    click.echo(save_to)
+
+
+@app.command("replace-text")
+@cloup.argument("img", type=cloup.Path(exists=True, dir_okay=False))
+@cloup.argument("text", type=str)
+@cloup.option(
+    "-n", "--count", type=int, default=1, help="Number of times to replace image text."
+)
+@cloup.option("-c", "--color", type=str, default=None)
+@cloup.option("--font-scale", type=float, default=1)
+@cloup.option("--thickness", type=int, default=1)
+@cloup.option_group(
+    "Pre-processing",
+    cloup.option("-w", "--width", type=int, default=320),
+    cloup.option("-h", "--height", type=int, default=320),
+)
+@cloup.option_group(
+    "Text detection",
+    cloup.option("--score-threshold", type=float, default=0.5),
+    cloup.option("--nms-threshold", type=float, default=0.3),
+)
+@cloup.option(
+    "-o",
+    "--output",
+    type=cloup.Path(dir_okay=False),
+    default=None,
+)
+def replace_text(
+    img: Path,
+    text: str,
+    count: int,
+    color: str | None,
+    font_scale: float,
+    thickness: int,
+    width: int,
+    height: int,
+    score_threshold: float,
+    nms_threshold: float,
+    output: Path | None,
+):
+    """Replace text from an image."""
+    img_arr = Image.read(img).as_array()
+    bboxes = east_text_bbox(
+        img_arr,
+        pp_width=width,
+        pp_height=height,
+        score_threshold=score_threshold,
+        nms_threshold=nms_threshold,
+    )
+
+    if color is not None:
+        rgb_color = ImageColor.getrgb(color)
+
+    pts: np.ndarray
+    for _, pts in zip(range(count), bboxes):
+        if color is None:
+            x, y, w, h = cv2.boundingRect(pts)
+            cropped = img_arr[y : y + h, x : x + w]
+            rgb_color = get_contour_color(cropped)
+
+        img_arr = inpaint_bbox(img_arr, np.array([pts], dtype=pts.dtype))
+
+        img_arr = put_text_in_bbox(
+            img_arr,
+            text,
+            bbox=pts,
+            color=rgb_color,
+            fontScale=font_scale,
+            thickness=thickness,
+        )
+
+    save_to = Path("output.png") if output is None else output
+    Image(img_arr).save(save_to)
+
+    click.echo("Image saved to: ", sys.stderr, nl=False)
+    click.echo(save_to)
 
 
 @app.group()

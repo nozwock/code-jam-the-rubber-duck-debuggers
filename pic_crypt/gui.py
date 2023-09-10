@@ -4,7 +4,7 @@ from importlib import resources
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 
-from project import views
+from . import views
 
 views_files = resources.files(views)
 

@@ -3,7 +3,7 @@ import math
 import numpy as np
 from bitarray import bitarray
 
-from project.image import EncoderInterface, Image
+from .image import EncoderInterface, Image
 
 
 class DirectEncoder(EncoderInterface):
