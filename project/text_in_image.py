@@ -19,6 +19,10 @@ def create_colored_image(
     return image
 
 
+# TODO:
+# - add padding_x
+# - secret word must not be longer than the repeat word
+# - pad out the secret word if shorted than the repeat word
 def hide_with_repeatation(
     img: np.ndarray,
     secret: str,
