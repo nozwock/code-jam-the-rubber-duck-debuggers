@@ -170,15 +170,13 @@ def create_colored_image(
     return image
 
 
-# TODO:
-# - add padding_x
 def hide_with_repeatation(
     img: np.ndarray,
     secret: str,
     repeat: str,
     color: tuple[int, int, int] = (255, 255, 255),
     font_size: int = 10,
-    padding_y: int = 2,
+    padding: tuple[int, int] = (0, 2),
     trim_extra: bool = True,
 ) -> np.ndarray:
     """
@@ -187,12 +185,13 @@ def hide_with_repeatation(
     - `color` is in RGB.
     """
     img_height, img_width = img.shape[:2]
+    padding_x, padding_y = padding
 
     if len(secret) > len(repeat):
         if trim_extra:
             secret = secret[: len(repeat)]
         else:
-            raise ValueError("Expected length of `secret` string to be <= `repeat`.")
+            raise ValueError("Expected length of `secret` string to be <= `t`.")
     elif len(secret) < len(repeat):
         secret += repeat[len(secret) :]
 
@@ -203,25 +202,28 @@ def hide_with_repeatation(
     repeat_width, text_height = font.getbbox(repeat)[2:4]
     secret_width = font.getbbox(secret)[2]
 
-    max_texts = ((img_height // text_height) - 1) * ((img_width // repeat_width) - 1)
+    max_texts = ((img_height // (text_height + padding_y)) + 1) * (
+        (img_width // (repeat_width + padding_x)) + 1
+    ) - 1
     secret_pos = random.randint(0, max_texts)
-
     put_secret = True
     for i, y in enumerate(range(0, img_height, text_height + padding_y)):
         j = x = 0
 
         while x < img_width:
             org = (x, y)
-
+            if (x + repeat_width + padding_x) > img_width:
+                break
             if (i * (img_width // repeat_width)) + j != secret_pos:
                 draw.text(org, repeat, color, font)
-                x += repeat_width
+                x += repeat_width + padding_x
             elif put_secret:
                 draw.text(org, secret, color, font)
                 put_secret = False
-                x += secret_width
+                x += secret_width + padding_x
             else:
                 draw.text(org, repeat, color, font)
+                x += repeat_width + padding_x
 
             j += 1
 
@@ -240,25 +242,30 @@ if __name__ == "__main__":
     # cv2.imshow("", inpainted_img)
     # cv2.waitKey(0)
 
-    img = cv2.imread("stop-634941_640.jpg")
-    bboxes = east_text_bbox(img, pp_width=480)
+    # img = cv2.imread("test.png")
+    # bboxes = east_text_bbox(img, pp_width=480)
+    # cv2.imwrite("output.png", inpaint_bbox(img, bboxes))
+    # for pts in bboxes:
+    #     # x, y, w, h = cv2.boundingRect(pts)
+    #     # cropped = img[y : y + h, x : x + w].copy()
+    #     # print(get_contour_color(cropped))
 
-    img = inpaint_bbox(img, bboxes)
+    #     cv2.polylines(img, [pts], True, (0, 255, 0), 2)
 
-    pts: np.ndarray
-    for pts in bboxes:
-        x, y, w, h = cv2.boundingRect(pts)
-        img = put_text_in_bbox(
-            img,
-            "hello",
-            pts,
-            get_contour_color(img[y : y + h, x : x + w]),
-            fontScale=1.6,
-            thickness=2,
-        )
+    ...
 
-        # cv2.polylines(img, [pts], True, (0, 255, 0), 2)
-
-    cv2.imwrite("output.png", img)
-
+    # cv2.imwrite("output.png", img)
+    img = np.zeros([480, 720, 3], dtype=np.uint8)
+    img.fill(255)  # or img[:] = 255
+    new = hide_with_repeatation(
+        img,
+        "World",
+        "Hello",
+        color=(0, 0, 0),
+        font_size=10,
+        padding=(10, 7),
+        trim_extra=True,
+    )
+    cv2.imshow("Sup", new)
+    cv2.waitKey(0)
     ...
