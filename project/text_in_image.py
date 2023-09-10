@@ -10,7 +10,7 @@ from project.defines import FONT_ANDALEMO_PATH
 def create_colored_image(
     width: int, height: int, color: tuple[int, int, int] = (0, 0, 0)
 ) -> np.ndarray:
-    """Creates a image with a bgr space color."""
+    """Creates a image with a BGR color space."""
     b, g, r = color
     image = np.zeros((height, width, 3), np.uint8)
     image[:, :, 0] = b
@@ -21,8 +21,6 @@ def create_colored_image(
 
 # TODO:
 # - add padding_x
-# - secret word must not be longer than the repeat word
-# - pad out the secret word if shorted than the repeat word
 def hide_with_repeatation(
     img: np.ndarray,
     secret: str,
@@ -30,9 +28,18 @@ def hide_with_repeatation(
     color: tuple[int, int, int] = (255, 255, 255),
     font_size: int = 10,
     padding_y: int = 2,
+    trim_extra: bool = True,
 ) -> np.ndarray:
-    """Add the repeated text and the secret text in the image"""
+    """Hide `secret` string in an image by putting it in between repeations of some word."""
     img_height, img_width = img.shape[:2]
+
+    if len(repeat) > len(secret):
+        if trim_extra:
+            secret = secret[: len(repeat)]
+        else:
+            raise ValueError("Expected length of `secret` string to be <= `repeat`.")
+    elif len(repeat) < len(secret):
+        secret += repeat[len(secret) :]
 
     pil_img = Image.fromarray(img)
     draw = ImageDraw.Draw(pil_img)
