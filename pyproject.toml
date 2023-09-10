@@ -10,6 +10,7 @@ authors = [
     "Nhsdkk",
 ]
 license = "MIT"
+packages = [{ include = "project" }]
 
 [tool.poetry.scripts]
 project = 'project.cli:app'
