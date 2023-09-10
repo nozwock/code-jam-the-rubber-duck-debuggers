@@ -164,7 +164,7 @@ def hide_with_repeatation(
         if trim_extra:
             secret = secret[: len(repeat)]
         else:
-            raise ValueError("Expected length of `secret` string to be <= `repeat`.")
+            raise ValueError("Expected length of `secret` string to be <= `t`.")
     elif len(secret) < len(repeat):
         secret += repeat[len(secret):]
 
@@ -192,7 +192,6 @@ def hide_with_repeatation(
                 draw.text(org, secret, color, font)
                 put_secret = False
                 x = x + secret_width + padding_x
-                print(j, i)
             else:
                 draw.text(org, repeat, color, font)
                 x = x + repeat_width + padding_x
