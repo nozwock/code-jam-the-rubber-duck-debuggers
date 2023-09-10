@@ -176,8 +176,7 @@ def hide_with_repeatation(
     repeat: str,
     color: tuple[int, int, int] = (255, 255, 255),
     font_size: int = 10,
-    padding_y: int = 2,
-    padding_x: int = 0,
+    padding: tuple[int, int] = (0, 2),
     trim_extra: bool = True,
 ) -> np.ndarray:
     """
@@ -186,6 +185,7 @@ def hide_with_repeatation(
     - `color` is in RGB.
     """
     img_height, img_width = img.shape[:2]
+    padding_x, padding_y = padding
 
     if len(secret) > len(repeat):
         if trim_extra:
@@ -216,14 +216,14 @@ def hide_with_repeatation(
                 break
             if (i * (img_width // repeat_width)) + j != secret_pos:
                 draw.text(org, repeat, color, font)
-                x = x + repeat_width + padding_x
+                x += repeat_width + padding_x
             elif put_secret:
                 draw.text(org, secret, color, font)
                 put_secret = False
-                x = x + secret_width + padding_x
+                x += secret_width + padding_x
             else:
                 draw.text(org, repeat, color, font)
-                x = x + repeat_width + padding_x
+                x += repeat_width + padding_x
 
             j += 1
 
@@ -263,8 +263,7 @@ if __name__ == "__main__":
         "Hello",
         color=(0, 0, 0),
         font_size=10,
-        padding_y=10,
-        padding_x=7,
+        padding=(10, 7),
         trim_extra=True,
     )
     cv2.imshow("Sup", new)
