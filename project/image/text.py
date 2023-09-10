@@ -150,6 +150,7 @@ def hide_with_repeatation(
     color: tuple[int, int, int] = (255, 255, 255),
     font_size: int = 10,
     padding_y: int = 2,
+    padding_x: int = 2,
     trim_extra: bool = True,
 ) -> np.ndarray:
     """
@@ -165,7 +166,7 @@ def hide_with_repeatation(
         else:
             raise ValueError("Expected length of `secret` string to be <= `repeat`.")
     elif len(secret) < len(repeat):
-        secret += repeat[len(secret) :]
+        secret += repeat[len(secret):]
 
     pil_img = Image.fromarray(img)
     draw = ImageDraw.Draw(pil_img)
@@ -174,9 +175,9 @@ def hide_with_repeatation(
     repeat_width, text_height = font.getbbox(repeat)[2:4]
     secret_width = font.getbbox(secret)[2]
 
-    max_texts = ((img_height // text_height) - 1) * ((img_width // repeat_width) - 1)
+    max_texts = ((img_height // (text_height + padding_y))) * ((img_width // (repeat_width + padding_x)))
     secret_pos = random.randint(0, max_texts)
-
+    secret_pos = max_texts
     put_secret = True
     for i, y in enumerate(range(0, img_height, text_height + padding_y)):
         j = x = 0
@@ -186,13 +187,15 @@ def hide_with_repeatation(
 
             if (i * (img_width // repeat_width)) + j != secret_pos:
                 draw.text(org, repeat, color, font)
-                x += repeat_width
+                x = x + repeat_width + padding_x
             elif put_secret:
                 draw.text(org, secret, color, font)
                 put_secret = False
-                x += secret_width
+                x = x + secret_width + padding_x
+                print(j, i)
             else:
                 draw.text(org, repeat, color, font)
+                x = x + repeat_width + padding_x
 
             j += 1
 
@@ -211,18 +214,23 @@ if __name__ == "__main__":
     # cv2.imshow("", inpainted_img)
     # cv2.waitKey(0)
 
-    img = cv2.imread("test.png")
-    bboxes = east_text_bbox(img, pp_width=480)
-    cv2.imwrite("output.png", inpaint_bbox(img, bboxes))
-    for pts in bboxes:
-        # x, y, w, h = cv2.boundingRect(pts)
-        # cropped = img[y : y + h, x : x + w].copy()
-        # print(get_contour_color(cropped))
+    # img = cv2.imread("test.png")
+    # bboxes = east_text_bbox(img, pp_width=480)
+    # cv2.imwrite("output.png", inpaint_bbox(img, bboxes))
+    # for pts in bboxes:
+    #     # x, y, w, h = cv2.boundingRect(pts)
+    #     # cropped = img[y : y + h, x : x + w].copy()
+    #     # print(get_contour_color(cropped))
 
-        cv2.polylines(img, [pts], True, (0, 255, 0), 2)
+    #     cv2.polylines(img, [pts], True, (0, 255, 0), 2)
 
-        ...
+    ...
 
     # cv2.imwrite("output.png", img)
-
+    # img = np.zeros([480, 720, 3], dtype=np.uint8)
+    # img.fill(255)  # or img[:] = 255
+    # new = hide_with_repeatation(img, "Hello", "World", color=(0, 0, 0), font_size=10, padding_y=10,
+    #                             padding_x=15, trim_extra=True)
+    # cv2.imshow("Sup", new)
+    # cv2.waitKey(0)
     ...

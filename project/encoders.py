@@ -105,7 +105,7 @@ class LsbSteganographyEncoder(EncoderInterface):
 
         data = bitarray()
         for lv in channels[
-            bytes_for_data_bits * 8 : bytes_for_data_bits * 8 + data_len * 8
+            bytes_for_data_bits * 8: bytes_for_data_bits * 8 + data_len * 8
         ]:
             data.append(lv & 1)
 
