@@ -1,5 +1,6 @@
 import math
 import random
+from typing import Sequence
 
 import cv2
 import numpy as np
@@ -113,19 +114,47 @@ def get_contour_color(img: np.ndarray) -> tuple[float, ...]:
     return cv2.mean(img, mask)
 
 
-# TODO: Need to put text according to the bbox, it could be rotated
-def add_text(
-    img: np.ndarray, box: tuple[int, int, int, int], text: str, color: np.ndarray
-):
+def _ordered_rect_points(pts: np.ndarray):
+    assert pts.shape == (4, 2)
+
+    sum_ = pts.sum(axis=1)
+    diff = np.diff(pts, axis=1)
+    return np.array(
+        [
+            pts[np.argmin(sum_)],
+            pts[np.argmin(diff)],
+            pts[np.argmax(diff)],
+            pts[np.argmax(diff)],
+        ],
+        dtype=pts.dtype,
+    )
+
+
+# TODO:
+# - Take rotation into account
+# - Auto scale the font size depending on the bbox dimensions
+def put_text_in_bbox(
+    img: np.ndarray,
+    text: str,
+    bbox: np.ndarray,
+    color: Sequence[float],
+    fontFace: int = cv2.FONT_HERSHEY_SIMPLEX,
+    fontScale: float = 1,
+    thickness: int = 1,
+    lineType: int = cv2.LINE_AA,
+) -> np.ndarray:
+    """`bbox` is of shape `(4, 2)`."""
+    topleft, topright, bottomleft, bottomright = _ordered_rect_points(bbox)
+
     return cv2.putText(
         img,
         text,
-        (box[2], box[1]),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        1,
-        tuple(color),
-        1,
-        cv2.LINE_AA,
+        bottomleft,
+        fontFace,
+        fontScale,
+        color,
+        thickness,
+        lineType,
     )
 
 
@@ -211,18 +240,25 @@ if __name__ == "__main__":
     # cv2.imshow("", inpainted_img)
     # cv2.waitKey(0)
 
-    img = cv2.imread("test.png")
+    img = cv2.imread("stop-634941_640.jpg")
     bboxes = east_text_bbox(img, pp_width=480)
-    cv2.imwrite("output.png", inpaint_bbox(img, bboxes))
+
+    img = inpaint_bbox(img, bboxes)
+
+    pts: np.ndarray
     for pts in bboxes:
-        # x, y, w, h = cv2.boundingRect(pts)
-        # cropped = img[y : y + h, x : x + w].copy()
-        # print(get_contour_color(cropped))
+        x, y, w, h = cv2.boundingRect(pts)
+        img = put_text_in_bbox(
+            img,
+            "hello",
+            pts,
+            get_contour_color(img[y : y + h, x : x + w]),
+            fontScale=1.6,
+            thickness=2,
+        )
 
-        cv2.polylines(img, [pts], True, (0, 255, 0), 2)
+        # cv2.polylines(img, [pts], True, (0, 255, 0), 2)
 
-        ...
-
-    # cv2.imwrite("output.png", img)
+    cv2.imwrite("output.png", img)
 
     ...
