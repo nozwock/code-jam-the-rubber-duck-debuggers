@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "project"
+name = "pic-crypt"
 version = "0.1.0"
 description = ""
 authors = [
@@ -10,10 +10,10 @@ authors = [
     "Nhsdkk",
 ]
 license = "MIT"
-packages = [{ include = "project" }]
+packages = [{ include = "pic_crypt" }]
 
 [tool.poetry.scripts]
-project = 'project.cli:app'
+pic-crypt = 'pic_crypt.cli:app'
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.12"

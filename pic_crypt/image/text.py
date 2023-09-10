@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
-from project.defines import EAST_TEXT_DETECTION_MODEL_PATH, FONT_ANDALEMO_PATH
+from ..defines import EAST_TEXT_DETECTION_MODEL_PATH, FONT_ANDALEMO_PATH
 
 
 def east_text_bbox(
