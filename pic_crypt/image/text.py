@@ -1,11 +1,12 @@
 import math
 import random
+from typing import Sequence
 
 import cv2
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
-from project.defines import EAST_TEXT_DETECTION_MODEL_PATH, FONT_ANDALEMO_PATH
+from ..defines import EAST_TEXT_DETECTION_MODEL_PATH, FONT_ANDALEMO_PATH
 
 
 def east_text_bbox(
@@ -113,19 +114,47 @@ def get_contour_color(img: np.ndarray) -> tuple[float, ...]:
     return cv2.mean(img, mask)
 
 
-# TODO: Need to put text according to the bbox, it could be rotated
-def add_text(
-    img: np.ndarray, box: tuple[int, int, int, int], text: str, color: np.ndarray
-):
+def _ordered_rect_points(pts: np.ndarray):
+    assert pts.shape == (4, 2)
+
+    sum_ = pts.sum(axis=1)
+    diff = np.diff(pts, axis=1)
+    return np.array(
+        [
+            pts[np.argmin(sum_)],
+            pts[np.argmin(diff)],
+            pts[np.argmax(diff)],
+            pts[np.argmax(diff)],
+        ],
+        dtype=pts.dtype,
+    )
+
+
+# TODO:
+# - Take rotation into account
+# - Auto scale the font size depending on the bbox dimensions
+def put_text_in_bbox(
+    img: np.ndarray,
+    text: str,
+    bbox: np.ndarray,
+    color: Sequence[float],
+    fontFace: int = cv2.FONT_HERSHEY_SIMPLEX,
+    fontScale: float = 1,
+    thickness: int = 1,
+    lineType: int = cv2.LINE_AA,
+) -> np.ndarray:
+    """`bbox` is of shape `(4, 2)`."""
+    topleft, topright, bottomleft, bottomright = _ordered_rect_points(bbox)
+
     return cv2.putText(
         img,
         text,
-        (box[2], box[1]),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        1,
-        tuple(color),
-        1,
-        cv2.LINE_AA,
+        bottomleft,
+        fontFace,
+        fontScale,
+        color,
+        thickness,
+        lineType,
     )
 
 
@@ -164,7 +193,7 @@ def hide_with_repeatation(
         else:
             raise ValueError("Expected length of `secret` string to be <= `t`.")
     elif len(secret) < len(repeat):
-        secret += repeat[len(secret):]
+        secret += repeat[len(secret) :]
 
     pil_img = Image.fromarray(img)
     draw = ImageDraw.Draw(pil_img)
@@ -173,7 +202,9 @@ def hide_with_repeatation(
     repeat_width, text_height = font.getbbox(repeat)[2:4]
     secret_width = font.getbbox(secret)[2]
 
-    max_texts = ((img_height // (text_height + padding_y)) + 1) * ((img_width // (repeat_width + padding_x)) + 1) - 1
+    max_texts = ((img_height // (text_height + padding_y)) + 1) * (
+        (img_width // (repeat_width + padding_x)) + 1
+    ) - 1
     secret_pos = random.randint(0, max_texts)
     put_secret = True
     for i, y in enumerate(range(0, img_height, text_height + padding_y)):
@@ -226,8 +257,16 @@ if __name__ == "__main__":
     # cv2.imwrite("output.png", img)
     img = np.zeros([480, 720, 3], dtype=np.uint8)
     img.fill(255)  # or img[:] = 255
-    new = hide_with_repeatation(img, "World", "Hello", color=(0, 0, 0), font_size=10, padding_y=10,
-                                padding_x=7, trim_extra=True)
+    new = hide_with_repeatation(
+        img,
+        "World",
+        "Hello",
+        color=(0, 0, 0),
+        font_size=10,
+        padding_y=10,
+        padding_x=7,
+        trim_extra=True,
+    )
     cv2.imshow("Sup", new)
     cv2.waitKey(0)
     ...
