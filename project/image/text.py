@@ -181,7 +181,8 @@ def hide_with_repeatation(
 
         while x < img_width:
             org = (x, y)
-
+            if (x + repeat_width + padding_x) > img_width:
+                break
             if (i * (img_width // repeat_width)) + j != secret_pos:
                 draw.text(org, repeat, color, font)
                 x = x + repeat_width + padding_x
@@ -189,7 +190,6 @@ def hide_with_repeatation(
                 draw.text(org, secret, color, font)
                 put_secret = False
                 x = x + secret_width + padding_x
-                print(j, i)
             else:
                 draw.text(org, repeat, color, font)
                 x = x + repeat_width + padding_x
