@@ -148,7 +148,7 @@ def hide_with_repeatation(
     color: tuple[int, int, int] = (255, 255, 255),
     font_size: int = 10,
     padding_y: int = 2,
-    padding_x: int = 2,
+    padding_x: int = 0,
     trim_extra: bool = True,
 ) -> np.ndarray:
     """
