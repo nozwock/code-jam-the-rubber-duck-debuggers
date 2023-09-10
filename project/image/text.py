@@ -141,8 +141,6 @@ def create_colored_image(
     return image
 
 
-# TODO:
-# - add padding_x
 def hide_with_repeatation(
     img: np.ndarray,
     secret: str,
@@ -175,7 +173,7 @@ def hide_with_repeatation(
     repeat_width, text_height = font.getbbox(repeat)[2:4]
     secret_width = font.getbbox(secret)[2]
 
-    max_texts = ((img_height // (text_height + padding_y))) * ((img_width // (repeat_width + padding_x)))
+    max_texts = ((img_height // (text_height + padding_y)) + 1) * ((img_width // (repeat_width + padding_x)) + 1) - 1
     secret_pos = random.randint(0, max_texts)
     put_secret = True
     for i, y in enumerate(range(0, img_height, text_height + padding_y)):
@@ -191,6 +189,7 @@ def hide_with_repeatation(
                 draw.text(org, secret, color, font)
                 put_secret = False
                 x = x + secret_width + padding_x
+                print(j, i)
             else:
                 draw.text(org, repeat, color, font)
                 x = x + repeat_width + padding_x
@@ -227,7 +226,7 @@ if __name__ == "__main__":
     # cv2.imwrite("output.png", img)
     img = np.zeros([480, 720, 3], dtype=np.uint8)
     img.fill(255)  # or img[:] = 255
-    new = hide_with_repeatation(img, "Hello", "World", color=(0, 0, 0), font_size=10, padding_y=10,
+    new = hide_with_repeatation(img, "World", "Hello", color=(0, 0, 0), font_size=10, padding_y=10,
                                 padding_x=7, trim_extra=True)
     cv2.imshow("Sup", new)
     cv2.waitKey(0)
