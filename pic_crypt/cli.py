@@ -2,15 +2,17 @@
 
 import sys
 from pathlib import Path
-from typing import BinaryIO
+from typing import BinaryIO, cast
 
 import click
 import cloup
 from cloup.constraints import AnySet, If, require_all, require_one
+from PIL import ImageColor
 
 from .ciphers import KDF, Cipher
 from .encoders import DirectEncoder, LsbSteganographyEncoder
 from .image import Image
+from .image.text import create_colored_image, hide_with_repeatation
 
 
 @cloup.group(
@@ -18,6 +20,58 @@ from .image import Image
 )
 def app():
     ...
+
+
+@app.command("hide-text")
+@cloup.argument("secret", type=str)
+@cloup.argument("repeat", type=str)
+@cloup.option_group(
+    "Image",
+    cloup.option("-w", "--width", type=int, default=720),
+    cloup.option("-h", "--height", type=int, default=480),
+    cloup.option("--img-color", type=str, default="#000000"),
+)
+@cloup.option("-c", "--color", type=str, default="#ffffff")
+@cloup.option("--font-size", type=int, default=10)
+@cloup.option("-p", "--padding", type=str, default="0, 2")
+@cloup.option("--trim-extra", type=bool, default=True)
+@cloup.option(
+    "-o",
+    "--output",
+    type=cloup.Path(dir_okay=False),
+    default=None,
+)
+def hide_text(
+    secret: str,
+    repeat: str,
+    width: int,
+    height: int,
+    img_color: str,
+    color: str,
+    font_size: int,
+    padding: str,
+    trim_extra: bool,
+    output: Path | None,
+):
+    """Generates an image with a hidden secret string by putting it in between repeations of some string."""
+    rgb_color = ImageColor.getrgb(color)
+    rgb_img_color = ImageColor.getrgb(img_color)
+
+    save_to = Path("output.png") if output is None else output
+    Image(
+        hide_with_repeatation(
+            create_colored_image(width, height, rgb_img_color),
+            secret,
+            repeat,
+            color=rgb_color,
+            font_size=font_size,
+            padding=cast(tuple[int, int], tuple(map(int, padding.split(",")[:2]))),
+            trim_extra=trim_extra,
+        )
+    ).save(save_to)
+
+    click.echo("Image saved to: ", sys.stderr, nl=False)
+    click.echo(save_to)
 
 
 @app.group()
