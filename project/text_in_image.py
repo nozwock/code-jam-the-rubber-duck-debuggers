@@ -33,12 +33,12 @@ def hide_with_repeatation(
     """Hide `secret` string in an image by putting it in between repeations of some word."""
     img_height, img_width = img.shape[:2]
 
-    if len(repeat) > len(secret):
+    if len(secret) > len(repeat):
         if trim_extra:
             secret = secret[: len(repeat)]
         else:
             raise ValueError("Expected length of `secret` string to be <= `repeat`.")
-    elif len(repeat) < len(secret):
+    elif len(secret) < len(repeat):
         secret += repeat[len(secret) :]
 
     pil_img = Image.fromarray(img)
@@ -75,7 +75,7 @@ def hide_with_repeatation(
 
 if __name__ == "__main__":
     image = create_colored_image(720, 480)
-    image = hide_with_repeatation(image, "12345", "World")
+    image = hide_with_repeatation(image, "Supreme", "World")
     cv2.imwrite("output.png", image)
     # cv2.imshow("A New Image", image)
     # cv2.waitKey(0)
