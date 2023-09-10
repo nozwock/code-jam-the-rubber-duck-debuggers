@@ -1,9 +1,11 @@
 import math
+import random
 
 import cv2
 import numpy as np
+from PIL import Image, ImageDraw, ImageFont
 
-from project.defines import EAST_TEXT_DETECTION_MODEL_PATH
+from project.defines import EAST_TEXT_DETECTION_MODEL_PATH, FONT_ANDALEMO_PATH
 
 
 def east_text_bbox(
@@ -98,9 +100,23 @@ def inpaint_bbox(img: np.ndarray, bboxes: np.ndarray) -> np.ndarray:
     return img
 
 
-# TODO: Need to put text according to the bbox
-# bbox could be rotated
-def add_text(img: np.ndarray, box: tuple[int, 4], text: str, color: np.ndarray):
+def get_contour_color(img: np.ndarray) -> tuple[float, ...]:
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    ret, thresh = cv2.threshold(
+        gray, 150, 255, cv2.THRESH_BINARY
+    )  # doesn't work for dark text, require cv2.THRESH_BINARY_INV
+
+    contours, heirarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+
+    mask = np.zeros(img.shape[:2], np.uint8)
+    cv2.drawContours(mask, contours, -1, 255, -1)
+    return cv2.mean(img, mask)
+
+
+# TODO: Need to put text according to the bbox, it could be rotated
+def add_text(
+    img: np.ndarray, box: tuple[int, int, int, int], text: str, color: np.ndarray
+):
     return cv2.putText(
         img,
         text,
@@ -113,15 +129,74 @@ def add_text(img: np.ndarray, box: tuple[int, 4], text: str, color: np.ndarray):
     )
 
 
-def get_contour_color(img: np.ndarray) -> tuple[float, ...]:
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    ret, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
+def create_colored_image(
+    width: int, height: int, color: tuple[int, int, int] = (0, 0, 0)
+) -> np.ndarray:
+    """Creates a image with a BGR color space."""
+    b, g, r = color
+    image = np.zeros((height, width, 3), np.uint8)
+    image[:, :, 0] = b
+    image[:, :, 1] = g
+    image[:, :, 2] = r
+    return image
 
-    contours, heirarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 
-    mask = np.zeros(img.shape[:2], np.uint8)
-    cv2.drawContours(mask, contours, -1, 255, -1)
-    return cv2.mean(img, mask)
+# TODO:
+# - add padding_x
+def hide_with_repeatation(
+    img: np.ndarray,
+    secret: str,
+    repeat: str,
+    color: tuple[int, int, int] = (255, 255, 255),
+    font_size: int = 10,
+    padding_y: int = 2,
+    trim_extra: bool = True,
+) -> np.ndarray:
+    """
+    Hide `secret` string in an image by putting it in between repeations of some word.
+
+    - `color` is in RGB.
+    """
+    img_height, img_width = img.shape[:2]
+
+    if len(secret) > len(repeat):
+        if trim_extra:
+            secret = secret[: len(repeat)]
+        else:
+            raise ValueError("Expected length of `secret` string to be <= `repeat`.")
+    elif len(secret) < len(repeat):
+        secret += repeat[len(secret) :]
+
+    pil_img = Image.fromarray(img)
+    draw = ImageDraw.Draw(pil_img)
+    font = ImageFont.truetype(str(FONT_ANDALEMO_PATH), font_size)
+
+    repeat_width, text_height = font.getbbox(repeat)[2:4]
+    secret_width = font.getbbox(secret)[2]
+
+    max_texts = ((img_height // text_height) - 1) * ((img_width // repeat_width) - 1)
+    secret_pos = random.randint(0, max_texts)
+
+    put_secret = True
+    for i, y in enumerate(range(0, img_height, text_height + padding_y)):
+        j = x = 0
+
+        while x < img_width:
+            org = (x, y)
+
+            if (i * (img_width // repeat_width)) + j != secret_pos:
+                draw.text(org, repeat, color, font)
+                x += repeat_width
+            elif put_secret:
+                draw.text(org, secret, color, font)
+                put_secret = False
+                x += secret_width
+            else:
+                draw.text(org, repeat, color, font)
+
+            j += 1
+
+    return np.array(pil_img)
 
 
 if __name__ == "__main__":
