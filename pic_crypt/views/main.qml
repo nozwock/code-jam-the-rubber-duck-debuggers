@@ -18,11 +18,11 @@ ApplicationWindow {
     QtObject {
         id: internal
 
-        function isFormValid() {
+        function isFormValid(): bool {
             return usernameField.text !== "" && serverAddrField.text !== ""
         }
 
-        function showJoinRoom(valid) {
+        function showJoinRoom(valid: bool) {
             if (isFormValid()) {
                 const component = Qt.createComponent("join_room.qml")
                 const win = component.createObject()
@@ -31,7 +31,7 @@ ApplicationWindow {
             }
         }
 
-        function showCreateRoom(valid) {
+        function showCreateRoom(valid: bool) {
             if (isFormValid()) {
                 const component = Qt.createComponent("create_room.qml")
                 const win = component.createObject()
