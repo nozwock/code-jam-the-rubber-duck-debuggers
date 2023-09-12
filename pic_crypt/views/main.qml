@@ -6,7 +6,7 @@ import QtQuick.Layouts
 
 ApplicationWindow {
     width: 400
-    height: 500
+    height: 480
     visible: true
     title: "Home Page"
     flags: Qt.MSWindowsFixedSizeDialogHint
@@ -53,7 +53,7 @@ ApplicationWindow {
             width: 300
             text: "localhost"
             selectByMouse: true
-            placeholderText: "Enter Server address"
+            placeholderText: "Server Address"
             Layout.fillWidth: true
             Layout.maximumWidth: 500
             Layout.margins: 12
@@ -64,7 +64,7 @@ ApplicationWindow {
             width: 300
             text: ""
             selectByMouse: true
-            placeholderText: "Enter your name"
+            placeholderText: "Player Name"
             Layout.fillWidth: true
             Layout.maximumWidth: 500
             Layout.margins: 12

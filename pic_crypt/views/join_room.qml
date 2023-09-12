@@ -5,12 +5,37 @@ import QtQuick.Layouts
 import QtQuick.Window
 
 ApplicationWindow {
-    width: 680
-    height: 420
+    width: 400
+    height: 320
     visible: true
     title: "Join Room"
-    flags: Qt.MSWindowsFixedSizeDialogHint
+
     // Theme
     Material.theme: Material.Dark
     Material.accent: Material.Orange
+
+    ColumnLayout {
+        anchors.fill: parent
+        anchors.centerIn: parent
+        spacing: 20
+        anchors.margins: 24
+
+        Item {
+            Layout.fillHeight: true
+        }
+        TextField {
+            id: roomID
+            placeholderText: "Room ID"
+            Layout.fillWidth: true
+            Layout.maximumWidth: 320
+            Layout.alignment: Qt.AlignCenter
+        }
+        Button {
+            text: "Join!"
+            Layout.alignment: Qt.AlignCenter
+        }
+        Item {
+            Layout.fillHeight: true
+        }
+    }
 }
