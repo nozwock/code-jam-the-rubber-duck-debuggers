@@ -2,6 +2,8 @@
 
 **Team: `the-rubber-duck-debuggers`**
 
+Comprehensive README: [presentation](docs/presentation.md)
+
 ## Installation
 - Using `pipx`.
     1. Install `pipx`.
