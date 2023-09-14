@@ -181,7 +181,7 @@ Here is a summary of each contributor's key contributions:
     - Contributed to documentation tasks
 
 - **Nhsdkk:**
-    - Added an `Image` object and an `EncoderInterface`
+    - Added an `Image` object and an `EncoderInterface`.
     - Worked on frontend development for the planned multiplayer game project.
 
 - **SimonMeersschaut:**
