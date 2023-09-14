@@ -15,7 +15,7 @@ Commands:
 ```
 
 ## Features
-## Transcoding
+### Transcoding
 The option to encrypt the data before performing transcoding is available.
 
 There are two implementations available:
@@ -102,5 +102,70 @@ There are two implementations available:
         ...
         ```
 
-> [!NOTE]
-> These transcodings were achieved through the use of straightforward bit manipulation in conjunction with NumPy arrays.
+These transcodings were accomplished using simple bit manipulation techniques combined with NumPy arrays. They are tied to the 'secret codes' theme as they involve concealing information within an image, often without the user's awareness of its presence.
+
+### Hidden Text
+
+Conceal a "secret" string within an image by interleaving it between repetitions of a selected word, often rendering it challenging to detect.
+
+```
+Usage: pic-crypt hide-text [OPTIONS] SECRET REPEAT
+
+  Generates an image with a hidden secret string by putting it in between
+  repeations of some string.
+
+Image:
+  -w, --width INTEGER   [default: 720]
+  -h, --height INTEGER  [default: 480]
+  --img-color TEXT      [default: #000000]
+
+Other options:
+  -c, --color TEXT      [default: #ffffff]
+  --font-size INTEGER   [default: 10]
+  -p, --padding TEXT    [default: 0, 2]
+  --trim-extra BOOLEAN  [default: True]
+  -o, --output FILE
+  --help                Show this message and exit.
+```
+
+How to use-
+```sh
+$ pic-crypt hide-text secret helloo
+Image saved to: output.png
+```
+![hidden](https://github.com/nozwock/code-jam-the-rubber-duck-debuggers/assets/57829219/b7a9d769-4d22-469a-9112-8443e156e00c)
+
+Pillow was utilized for rendering the text through repeated placement, employing basic calculations.
+
+### Replace Text
+
+Text replacement within an image is achieved by utilizing the EAST text detection model in conjunction with OpenCV. The process involves inpainting to remove the text and subsequently redrawing the desired text onto the image. These operations are facilitated using OpenCV features.
+
+```
+Usage: pic-crypt replace-text [OPTIONS] IMG TEXT
+
+  Replace text from an image.
+
+Pre-processing:
+  -w, --width INTEGER      [default: 320]
+  -h, --height INTEGER     [default: 320]
+
+Text detection:
+  --score-threshold FLOAT  [default: 0.5]
+  --nms-threshold FLOAT    [default: 0.3]
+
+Other options:
+  -n, --count INTEGER      Number of times to replace image text.  [default: 1]
+  -c, --color TEXT
+  --font-scale FLOAT       [default: 1]
+  --thickness INTEGER      [default: 1]
+  -o, --output FILE
+  --help                   Show this message and exit.
+```
+
+How to use-
+```sh
+$ pic-crypt replace-text tests/stop.jpg Hello --font-scale 1.6 --thickness 2
+Image saved to: output.png
+```
+![replace-text](https://github.com/nozwock/code-jam-the-rubber-duck-debuggers/assets/57829219/3fb4826e-38bf-455b-890a-a2c5a3234134)
