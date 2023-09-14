@@ -194,4 +194,4 @@ Here is a summary of each contributor's key contributions:
 - **nozwock:**
     - Implemented the encoder for the direct transcoder.
     - Added additional CLI commands.
-    - Took responsibility for codebase refactoring efforts.
+    - Assumed responsibility for codebase refactoring and review efforts.
