@@ -169,3 +169,29 @@ $ pic-crypt replace-text tests/stop.jpg Hello --font-scale 1.6 --thickness 2
 Image saved to: output.png
 ```
 ![replace-text](https://github.com/nozwock/code-jam-the-rubber-duck-debuggers/assets/57829219/3fb4826e-38bf-455b-890a-a2c5a3234134)
+
+## Contibutors
+
+Here is a summary of each contributor's key contributions:
+- **realstealthninja:**
+    - Implemented the decoder for the direct transcoder.
+    - Implemented the initial version of the LSB steganography transcoder.
+    - Added CLI commands for the transcoders.
+    - Implemented the preliminary text replacement feature, using `pytesseract`.
+    - Contributed to documentation tasks
+
+- **Nhsdkk:**
+    - Added an `Image` object and an `EncoderInterface`
+    - Worked on frontend development for the planned multiplayer game project.
+
+- **SimonMeersschaut:**
+    - Worked on the flask webserver backend development for the planned multiplayer game project.
+
+- **Sapient44:**
+    - Implemented password-based encryption using symmetric encryption and key derivation functions.
+    - Added functionality for visually hiding text within images, disguising it as repeated text.
+
+- **nozwock:**
+    - Implemented the encoder for the direct transcoder.
+    - Added additional CLI commands.
+    - Took responsibility for codebase refactoring efforts.
